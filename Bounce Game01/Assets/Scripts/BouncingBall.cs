@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using UnityEngine.SceneManagement;
 using UnityEngine;
 
-public class BouncingBall : MonoBehaviour {
+public class BouncingBall : MonoBehaviour
+{
 
     public string key01;
     public string key02;
@@ -12,16 +13,28 @@ public class BouncingBall : MonoBehaviour {
     public float transformForce = 3;
     public float JumpSpeed = 200;
     private Rigidbody2D rigid;
+
+    AudioSource audioSource;
+    public AudioClip bounceSound;
+    Animator animator;
+    bool hasBounced = false;
+
     // Use this for initialization
-    void Start ()
+    void Start()
     {
+        audioSource = GetComponent<AudioSource>();
+        animator = GetComponent<Animator>();
         rigid = GetComponent<Rigidbody2D>();
 
+        audioSource.Play();
     }
-	
-	// Update is called once per frame
-	void Update () {
-		if (Input.GetAxis(key01) == 1)
+
+    // Update is called once per frame
+    void Update()
+    {
+        animator.SetBool("hasBounced", hasBounced);
+
+        if (Input.GetAxis(key01) == 1)
         {
             transform.Translate(Vector3.right * Time.deltaTime * speed);
             rigid.AddForce(Vector3.right * transformForce, ForceMode2D.Force);
@@ -35,7 +48,7 @@ public class BouncingBall : MonoBehaviour {
         if (Input.GetKeyDown(KeyCode.Space))
         {
             rigid.bodyType = RigidbodyType2D.Dynamic;
-            rigid.velocity = new Vector2(0,0);
+            rigid.velocity = new Vector2(0, 0);
             this.transform.parent = null;
         }
         if (Input.GetKeyDown(KeyCode.J))
@@ -46,6 +59,9 @@ public class BouncingBall : MonoBehaviour {
     }
     private void OnCollisionEnter2D(Collision2D collision)
     {
+        hasBounced = true;
+        audioSource.PlayOneShot(bounceSound);
+
         if (collision.gameObject.tag == "ColliderType1")
         {
             rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
@@ -53,21 +69,21 @@ public class BouncingBall : MonoBehaviour {
         else if (collision.gameObject.tag == "ColliderType2")
         {
             //rigid.AddForceAtPosition(Vector3.up * force * 15.0f, transform.position, ForceMode2D.Impulse);
-           // Vector3 reflect = Vector3.Reflect(transform.position, Vector3.right);
-            rigid.AddForce(Vector3.up * force , ForceMode2D.Impulse);
+            // Vector3 reflect = Vector3.Reflect(transform.position, Vector3.right);
+            rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
             //rigid.AddForce(reflect * Time.deltaTime * 5, ForceMode2D.Impulse);
         }
 
         else if (collision.gameObject.GetComponent<YelloType>())
         {
-            
+
             //rigid.AddForceAtPosition(Vector3.up * force, transform.position, ForceMode2D.Impulse);
             collision.gameObject.GetComponent<Rigidbody2D>().gravityScale = 1;
             if (collision.gameObject.GetComponent<YelloType>().isCollided)
             {
                 rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
             }
-                 
+
         }
         else if (collision.gameObject.tag == "LooseBorder" || collision.gameObject.tag == "Bomb")
         {
@@ -79,9 +95,13 @@ public class BouncingBall : MonoBehaviour {
             //Debug.Log("Hook");
             rigid.bodyType = RigidbodyType2D.Kinematic;
             this.transform.parent = collision.gameObject.transform;
-
         }
+    }
 
+
+    private void OnCollisionExit2D(Collision2D collision)
+    {
+        hasBounced = false;
     }
     private void OnTriggerEnter2D(Collider2D collision)
     {
