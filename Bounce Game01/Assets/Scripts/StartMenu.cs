@@ -12,7 +12,6 @@ public class StartMenu : MonoBehaviour
     bool hasStarted = true;
     public GameObject level1;
     public GameObject credits;
-    //public GameObject camera;
 
     public AudioClip selectSound;
 
