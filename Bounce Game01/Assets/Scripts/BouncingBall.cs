@@ -18,25 +18,29 @@ public class BouncingBall : MonoBehaviour
     public AudioClip bounceSound;
     Animator animator;
     bool hasBounced = false;
-
+    private GameManager gameManager;
     // Use this for initialization
     void Start()
-    {
+    {        
         audioSource = GetComponent<AudioSource>();
         animator = GetComponent<Animator>();
         rigid = GetComponent<Rigidbody2D>();
-
         audioSource.Play();
+        gameManager = GameObject.FindObjectOfType<GameManager>();
     }
 
     // Update is called once per frame
     void Update()
     {
+        // Adjust volume
+        audioSource.volume = gameManager.Sound;
+        
         animator.SetBool("hasBounced", hasBounced);
-
+        Vector3 velocity = new Vector3(0, rigid.velocity.y, 0);
+        rigid.velocity = velocity;
         if (Input.GetAxis(key01) == 1)
         {
-            transform.Translate(Vector3.right * Time.deltaTime * speed);
+            transform.Translate(Vector3.right * Time.deltaTime * speed);           
             rigid.AddForce(Vector3.right * transformForce, ForceMode2D.Force);
         }
         if (Input.GetAxis(key02) == 1)
