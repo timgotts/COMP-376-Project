@@ -33,7 +33,11 @@ public class BouncingBall : MonoBehaviour
     void Update()
     {
         // Adjust volume
-        audioSource.volume = gameManager.Sound;
+        if (audioSource.volume != gameManager.Sound)
+        {
+            audioSource.volume = gameManager.Sound;
+        }
+        
         
         animator.SetBool("hasBounced", hasBounced);
         Vector3 velocity = new Vector3(0, rigid.velocity.y, 0);
@@ -89,8 +93,17 @@ public class BouncingBall : MonoBehaviour
             }
 
         }
-        else if (collision.gameObject.tag == "LooseBorder" || collision.gameObject.tag == "Bomb")
+        else if (collision.gameObject.tag == "LooseBorder")
         {
+            Debug.Log("Losse by border");
+            Time.timeScale = 0;
+            //SceneManager.LoadScene("Loose");
+
+        }
+        else if (collision.gameObject.tag == "Bomb")
+        {
+            Debug.Log("Losse by bomb");
+            Time.timeScale = 0;
             SceneManager.LoadScene("Loose");
 
         }
