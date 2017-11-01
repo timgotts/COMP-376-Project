@@ -9,7 +9,7 @@ public class BouncingBall : MonoBehaviour
     public string key01;
     public string key02;
     public float speed;
-    public float force = 10;
+    public float force = 7;
     public float transformForce = 3;
     public float JumpSpeed = 200;
     private Rigidbody2D rigid;
@@ -19,6 +19,7 @@ public class BouncingBall : MonoBehaviour
     Animator animator;
     bool hasBounced = false;
     private GameManager gameManager;
+    private bool isConenctedToRope = false;
     // Use this for initialization
     void Start()
     {        
@@ -27,11 +28,21 @@ public class BouncingBall : MonoBehaviour
         rigid = GetComponent<Rigidbody2D>();
         audioSource.Play();
         gameManager = GameObject.FindObjectOfType<GameManager>();
+        if (gameManager.gameIsLoaded)
+        {
+            this.transform.position = gameManager.InitialPos();
+        }
+        
     }
 
     // Update is called once per frame
     void Update()
     {
+        // keep rotation 0 alwayes
+        if (transform.rotation.z !=0)
+        {
+            transform.rotation = Quaternion.identity;
+        }
         // Adjust volume
         if (audioSource.volume != gameManager.Sound)
         {
@@ -42,12 +53,12 @@ public class BouncingBall : MonoBehaviour
         animator.SetBool("hasBounced", hasBounced);
         Vector3 velocity = new Vector3(0, rigid.velocity.y, 0);
         rigid.velocity = velocity;
-        if (Input.GetAxis(key01) == 1)
+        if (Input.GetAxis(key01) == 1 && !isConenctedToRope)
         {
             transform.Translate(Vector3.right * Time.deltaTime * speed);           
             rigid.AddForce(Vector3.right * transformForce, ForceMode2D.Force);
         }
-        if (Input.GetAxis(key02) == 1)
+        if (Input.GetAxis(key02) == 1 && !isConenctedToRope)
         {
             transform.Translate(Vector3.left * Time.deltaTime * speed);
             rigid.AddForce(Vector3.left * transformForce, ForceMode2D.Force);
@@ -58,10 +69,10 @@ public class BouncingBall : MonoBehaviour
             rigid.bodyType = RigidbodyType2D.Dynamic;
             rigid.velocity = new Vector2(0, 0);
             this.transform.parent = null;
+            isConenctedToRope = false;
         }
         if (Input.GetKeyDown(KeyCode.J))
         {
-            Debug.Log("Jump");
             rigid.AddForce(Vector3.up * JumpSpeed, ForceMode2D.Force);
         }
     }
@@ -72,13 +83,17 @@ public class BouncingBall : MonoBehaviour
 
         if (collision.gameObject.tag == "ColliderType1")
         {
+            rigid.velocity = Vector3.zero;
             rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
         }
         else if (collision.gameObject.tag == "ColliderType2")
         {
+            rigid.velocity = Vector3.zero;
+            rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
+
             //rigid.AddForceAtPosition(Vector3.up * force * 15.0f, transform.position, ForceMode2D.Impulse);
             // Vector3 reflect = Vector3.Reflect(transform.position, Vector3.right);
-            rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
+
             //rigid.AddForce(reflect * Time.deltaTime * 5, ForceMode2D.Impulse);
         }
 
@@ -89,6 +104,7 @@ public class BouncingBall : MonoBehaviour
             collision.gameObject.GetComponent<Rigidbody2D>().gravityScale = 1;
             if (collision.gameObject.GetComponent<YelloType>().isCollided)
             {
+                rigid.velocity = Vector3.zero;
                 rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
             }
 
@@ -96,20 +112,24 @@ public class BouncingBall : MonoBehaviour
         else if (collision.gameObject.tag == "LooseBorder")
         {
             Debug.Log("Losse by border");
-            Time.timeScale = 0;
-            //SceneManager.LoadScene("Loose");
+            GameManager.LevelScore l;
+            l.height = transform.position.y.ToString();
+            l.score = gameManager.Score.ToString();
+            gameManager.Save(l);
+            SceneManager.LoadScene("Loose");
 
         }
         else if (collision.gameObject.tag == "Bomb")
         {
             Debug.Log("Losse by bomb");
-            Time.timeScale = 0;
+            //gameManager.Save(transform.position.y.ToString());
+            //Time.timeScale = 0;
             SceneManager.LoadScene("Loose");
 
         }
         else if (collision.gameObject.tag == "Hook" && Input.GetKey(KeyCode.A))
         {
-            //Debug.Log("Hook");
+            isConenctedToRope = true;
             rigid.bodyType = RigidbodyType2D.Kinematic;
             this.transform.parent = collision.gameObject.transform;
         }
@@ -126,6 +146,7 @@ public class BouncingBall : MonoBehaviour
         {
             rigid.velocity = Vector3.zero;
             Debug.Log("leftcollider");
+            rigid.velocity = Vector3.zero;
             rigid.AddForce(Vector3.up * 10, ForceMode2D.Impulse);
         }
         //Debug.Log("leftcollider");

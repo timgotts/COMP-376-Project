@@ -10,6 +10,7 @@ public class LevelManager : MonoBehaviour {
     private GameManager gameManager;
     private Text pauseText;
     private Text scoreText;
+    private Text bestScore;
     public GameObject soundObject;
     private SoundSlider soundSlider;
     // private bool isPause = false;
@@ -19,7 +20,7 @@ public class LevelManager : MonoBehaviour {
         gameManager = GameObject.FindObjectOfType<GameManager>();
         GameObject text = GameObject.Find("Pause");
         GameObject score = GameObject.Find("Score");
-        
+        GameObject bS = GameObject.Find("BestScore");
         if (text)
         {
             pauseText = text.GetComponent<Text>();
@@ -27,6 +28,11 @@ public class LevelManager : MonoBehaviour {
         if (score)
         {
             scoreText = score.GetComponent<Text>();
+        }
+        if (bS)
+        {
+            bestScore = bS.GetComponent<Text>();
+            bestScore.text = gameManager.bestscore.ToString();
         }
     }
 	
