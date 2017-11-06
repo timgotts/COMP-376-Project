@@ -12,6 +12,8 @@ public class BouncingBall : MonoBehaviour
     public float force = 7;
     public float transformForce = 3;
     public float JumpSpeed = 200;
+
+    public GameObject rockPowerUp;
     private Rigidbody2D rigid;
 
     AudioSource audioSource;
@@ -20,26 +22,31 @@ public class BouncingBall : MonoBehaviour
     bool hasBounced = false;
     private GameManager gameManager;
     private bool isConenctedToRope = false;
+
+    bool inRockMode = false;
+
     // Use this for initialization
     void Start()
-    {        
+    {
         audioSource = GetComponent<AudioSource>();
         animator = GetComponent<Animator>();
         rigid = GetComponent<Rigidbody2D>();
         audioSource.Play();
+
         gameManager = GameObject.FindObjectOfType<GameManager>();
+        
         if (gameManager.gameIsLoaded)
         {
             this.transform.position = gameManager.InitialPos();
         }
-        
+
     }
 
     // Update is called once per frame
     void Update()
     {
         // keep rotation 0 alwayes
-        if (transform.rotation.z !=0)
+        if (transform.rotation.z != 0)
         {
             transform.rotation = Quaternion.identity;
         }
@@ -48,20 +55,39 @@ public class BouncingBall : MonoBehaviour
         {
             audioSource.volume = gameManager.Sound;
         }
-        
-        
+
+
         animator.SetBool("hasBounced", hasBounced);
+        animator.SetBool("inRockMode", inRockMode);
+
         Vector3 velocity = new Vector3(0, rigid.velocity.y, 0);
         rigid.velocity = velocity;
+
         if (Input.GetAxis(key01) == 1 && !isConenctedToRope)
         {
-            transform.Translate(Vector3.right * Time.deltaTime * speed);           
-            rigid.AddForce(Vector3.right * transformForce, ForceMode2D.Force);
+            if (inRockMode)
+            {
+                transform.Translate(Vector3.right * Time.deltaTime * speed);
+                transform.Rotate(Vector3.forward,  Time.deltaTime * speed);
+            }
+            else
+            {
+                transform.Translate(Vector3.right * Time.deltaTime * speed);
+                rigid.AddForce(Vector3.right * transformForce, ForceMode2D.Force);
+            }
         }
         if (Input.GetAxis(key02) == 1 && !isConenctedToRope)
         {
-            transform.Translate(Vector3.left * Time.deltaTime * speed);
-            rigid.AddForce(Vector3.left * transformForce, ForceMode2D.Force);
+            if (inRockMode)
+            {
+                transform.Translate(Vector3.left * Time.deltaTime * speed);
+                transform.Rotate(Vector3.back, 2.0f * Time.deltaTime * speed);
+            }
+            else
+            {
+                transform.Translate(Vector3.left * Time.deltaTime * speed);
+                rigid.AddForce(Vector3.left * transformForce, ForceMode2D.Force);
+            }
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -83,13 +109,20 @@ public class BouncingBall : MonoBehaviour
 
         if (collision.gameObject.tag == "ColliderType1")
         {
-            rigid.velocity = Vector3.zero;
-            rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
+            if (!inRockMode)
+            {
+                rigid.velocity = Vector3.zero;
+                rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
+            }
+           
         }
         else if (collision.gameObject.tag == "ColliderType2")
         {
-            rigid.velocity = Vector3.zero;
-            rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
+            if (!inRockMode)
+            {
+                rigid.velocity = Vector3.zero;
+                rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
+            }
 
             //rigid.AddForceAtPosition(Vector3.up * force * 15.0f, transform.position, ForceMode2D.Impulse);
             // Vector3 reflect = Vector3.Reflect(transform.position, Vector3.right);
@@ -99,15 +132,16 @@ public class BouncingBall : MonoBehaviour
 
         else if (collision.gameObject.GetComponent<YelloType>())
         {
-
-            //rigid.AddForceAtPosition(Vector3.up * force, transform.position, ForceMode2D.Impulse);
-            collision.gameObject.GetComponent<Rigidbody2D>().gravityScale = 1;
-            if (collision.gameObject.GetComponent<YelloType>().isCollided)
+            if (!inRockMode)
             {
-                rigid.velocity = Vector3.zero;
-                rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
+                //rigid.AddForceAtPosition(Vector3.up * force, transform.position, ForceMode2D.Impulse);
+                collision.gameObject.GetComponent<Rigidbody2D>().gravityScale = 1;
+                if (collision.gameObject.GetComponent<YelloType>().isCollided)
+                {
+                    rigid.velocity = Vector3.zero;
+                    rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
+                }
             }
-
         }
         else if (collision.gameObject.tag == "LooseBorder")
         {
@@ -129,10 +163,24 @@ public class BouncingBall : MonoBehaviour
         }
         else if (collision.gameObject.tag == "Hook" && Input.GetKey(KeyCode.A))
         {
-            isConenctedToRope = true;
-            rigid.bodyType = RigidbodyType2D.Kinematic;
-            this.transform.parent = collision.gameObject.transform;
+            if (!inRockMode)
+            {
+                isConenctedToRope = true;
+                rigid.bodyType = RigidbodyType2D.Kinematic;
+                this.transform.parent = collision.gameObject.transform;
+            }
         }
+
+        if (collision.gameObject.CompareTag("Rock"))
+        {
+            print("Rock collision");
+            Destroy(rockPowerUp);
+            inRockMode = true;
+
+            //Set Physics Material to nothing
+            gameObject.GetComponent<CircleCollider2D>().sharedMaterial = null;
+        }
+
     }
 
 
