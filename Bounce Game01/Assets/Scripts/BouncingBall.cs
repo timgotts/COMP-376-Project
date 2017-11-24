@@ -20,8 +20,16 @@ public class BouncingBall : MonoBehaviour
     public AudioClip bounceSound;
     Animator animator;
     bool hasBounced = false;
-    //private GameManager gameManager;
+    //private GameManager gameManage
     private bool isConenctedToRope = false;
+
+
+    /// <summary>
+    /// All the audio clips
+    /// </summary>
+    public AudioClip rockExplosion;
+    public AudioClip enemyDead;
+    public AudioClip powerUpLost;
 
 
     //Tarik rock stuff
@@ -29,13 +37,18 @@ public class BouncingBall : MonoBehaviour
     bool inRockMode = false;
     bool hasJumped = false;
     bool hasGroundPound = false;
-
-
+    
     public Transform groundCheck;
     Vector3 tempVec;
     bool isGrounded = false;
     float groundCheckRadius = 0.5f;
     public GameObject explodeParticle;
+    public GameObject respawnParticle;
+
+    bool isDead = false;
+
+   public GameObject currentCheckpoint;
+
 
     // Use this for initialization
     void Start()
@@ -61,6 +74,11 @@ public class BouncingBall : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        if (isDead)
+        {
+
+        }
 
         //Checks if Blobby is grounded.
         CheckGrounded();
@@ -126,12 +144,18 @@ public class BouncingBall : MonoBehaviour
         }
         else if (Input.GetButtonDown("Down") && !isGrounded && inRockMode)
         {
+            hasGroundPound = true;
             transform.rotation = Quaternion.identity;
             GameObject temp = Instantiate(windAnimation, groundCheck.position, groundCheck.rotation);
             temp.GetComponent<Animator>().SetBool("isReady", true);
             temp.transform.parent = gameObject.transform;
-            hasGroundPound = true;
+
             rigid.AddForce(Vector3.down * 15, ForceMode2D.Impulse);
+        }
+
+        if (Input.GetKeyDown(KeyCode.L) && inRockMode)
+        {
+            GiveUpPower();
         }
 
 
@@ -155,7 +179,7 @@ public class BouncingBall : MonoBehaviour
         {
             //Only play bounce sound when in blob mode
             audioSource.PlayOneShot(bounceSound);
-            
+
             if (collision.gameObject.tag == "ColliderType1")
             {
                 rigid.velocity = Vector3.zero;
@@ -189,20 +213,24 @@ public class BouncingBall : MonoBehaviour
 
         if (collision.gameObject.tag == "LooseBorder")
         {
-            Debug.Log("Losse yby border");
+            //Debug.Log("Losse yby border");
             // GameManager.LevelScore l;
             // l.height = transform.position.y.ToString();
             // l.score = gameManager.Score.ToString();
             //  gameManager.Save(l);
-            SceneManager.LoadScene("Loose");
+
+            Respawn();
+            // SceneManager.LoadScene("Loose");
 
         }
         else if (collision.gameObject.tag == "Bomb")
         {
-            Debug.Log("Losse by bomb");
+            //Debug.Log("Losse by bomb");
             //gameManager.Save(transform.position.y.ToString());
             //Time.timeScale = 0;
-            SceneManager.LoadScene("Loose");
+
+            Respawn();
+            //SceneManager.LoadScene("Loose");
 
         }
         else if (collision.gameObject.tag == "Hook" && Input.GetKey(KeyCode.A))
@@ -215,29 +243,34 @@ public class BouncingBall : MonoBehaviour
             }
         }
 
-        if (collision.gameObject.CompareTag("Rock"))
-        {
-            print("Rock collision");
-            Destroy(rockPowerUp);
-            inRockMode = true;
-
-            //Set Physics Material to nothing
-            gameObject.GetComponent<CircleCollider2D>().sharedMaterial = null;
-        }
-
         if (collision.gameObject.CompareTag("Enemy"))
         {
-            if (inRockMode && hasGroundPound)
+            if (hasGroundPound)
             {
+                audioSource.PlayOneShot(rockExplosion);
+                audioSource.PlayOneShot(enemyDead);
                 Instantiate(explodeParticle, collision.gameObject.transform.position, collision.gameObject.transform.rotation);
                 Destroy(collision.gameObject);
             }
-            //else
-            //{
-            //    SceneManager.LoadScene("Loose");
-            //}
+            else if (inRockMode)
+            {
+                GiveUpPower();
+            }
+            else
+            {
+                Respawn();
+                //SceneManager.LoadScene("Loose");
+            }
         }
+    }
 
+    /// <summary>
+    /// Respawns player at checkpoint
+    /// </summary>
+    void Respawn()
+    {
+        transform.position = currentCheckpoint.transform.position;
+        Instantiate(respawnParticle, gameObject.transform.position, gameObject.transform.rotation);
     }
 
     /// <summary>
@@ -253,6 +286,12 @@ public class BouncingBall : MonoBehaviour
                 GameObject temp = GameObject.Find("WindAnimation(Clone)");
                 Destroy(temp);
                 isGrounded = true;
+
+                if (hasGroundPound)
+                {
+                    audioSource.PlayOneShot(rockExplosion);
+                }
+
                 hasGroundPound = false;
                 return;
             }
@@ -260,10 +299,32 @@ public class BouncingBall : MonoBehaviour
         isGrounded = false;
     }
 
+    /// <summary>
+    /// Gives up the power up obtained
+    /// </summary>
+    private void GiveUpPower()
+    {
+        audioSource.PlayOneShot(powerUpLost);
+        inRockMode = false;
+    }
+
+    /// <summary>
+    /// Sets has bounced to false in order to play the 
+    /// appropriate animation
+    /// </summary>
+    /// <param name="collision"></param>
     private void OnCollisionExit2D(Collision2D collision)
     {
         hasBounced = false;
     }
+
+
+    
+
+    /// <summary>
+    /// Checks if the collider caused a trigger.
+    /// </summary>
+    /// <param name="collision"></param>
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.tag == "LeftRotateCollider")
@@ -273,6 +334,15 @@ public class BouncingBall : MonoBehaviour
             rigid.velocity = Vector3.zero;
             rigid.AddForce(Vector3.up * 10, ForceMode2D.Impulse);
         }
-        //Debug.Log("leftcollider");
+
+        if (collision.gameObject.CompareTag("Rock"))
+        {
+            print("Rock collision");
+            Destroy(rockPowerUp);
+            inRockMode = true;
+
+            //Set Physics Material to nothing
+            gameObject.GetComponent<CircleCollider2D>().sharedMaterial = null;
+        }
     }
 }
