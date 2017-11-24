@@ -17,7 +17,7 @@ public class LevelManager : MonoBehaviour {
     // Use this for initialization
     void Start ()
     {
-        gameManager = GameObject.FindObjectOfType<GameManager>();
+       // gameManager = GameObject.FindObjectOfType<GameManager>();
         GameObject text = GameObject.Find("Pause");
         GameObject score = GameObject.Find("Score");
         GameObject bS = GameObject.Find("BestScore");
@@ -32,7 +32,7 @@ public class LevelManager : MonoBehaviour {
         if (bS)
         {
             bestScore = bS.GetComponent<Text>();
-            bestScore.text = gameManager.bestscore.ToString();
+           // bestScore.text = gameManager.bestscore.ToString();
         }
     }
 	
@@ -41,32 +41,32 @@ public class LevelManager : MonoBehaviour {
     {
         if (scoreText)
         {
-            scoreText.text = gameManager.Score.ToString();
+           // scoreText.text = gameManager.Score.ToString();
         }
     }
     public void Pause()
     {
-        gameManager.Pause(pauseText);
+       // gameManager.Pause(pauseText);
     }
     public void Loadlevel(int level)
     {
-        gameManager.Score = 0;
+      //  gameManager.Score = 0;
         SceneManager.LoadScene(level);
     }
     public void Setting()
     {
-        gameManager.Pause(pauseText);
-        if (soundSlider == null && gameManager.isPause)
-        {
-            GameObject sound = Instantiate(soundObject, new Vector3(-8, 20, 0), Quaternion.identity);
-            soundSlider = sound.GetComponent<SoundSlider>();
-            soundSlider.transform.parent = GameObject.Find("Canvas").transform;
-            RectTransform rect = soundSlider.GetComponent<RectTransform>();
-            rect.localPosition = Vector3.zero;
-        }
-        else
-        {
-            Destroy(soundSlider.gameObject);
-        }
+      //  gameManager.Pause(pauseText);
+        //if (soundSlider == null && gameManager.isPause)
+        //{
+        //    GameObject sound = Instantiate(soundObject, new Vector3(-8, 20, 0), Quaternion.identity);
+        //    soundSlider = sound.GetComponent<SoundSlider>();
+        //    soundSlider.transform.parent = GameObject.Find("Canvas").transform;
+        //    RectTransform rect = soundSlider.GetComponent<RectTransform>();
+        //    rect.localPosition = Vector3.zero;
+        //}
+        //else
+        //{
+        //    Destroy(soundSlider.gameObject);
+        //}
     }
 }

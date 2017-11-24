@@ -20,24 +20,40 @@ public class BouncingBall : MonoBehaviour
     public AudioClip bounceSound;
     Animator animator;
     bool hasBounced = false;
-    private GameManager gameManager;
+    //private GameManager gameManager;
     private bool isConenctedToRope = false;
 
+
+    //Tarik rock stuff
+    public GameObject windAnimation;
     bool inRockMode = false;
+    bool hasJumped = false;
+    bool hasGroundPound = false;
+
+
+    public Transform groundCheck;
+    Vector3 tempVec;
+    bool isGrounded = false;
+    float groundCheckRadius = 0.5f;
+    public GameObject explodeParticle;
 
     // Use this for initialization
     void Start()
     {
+
+        tempVec = gameObject.transform.position;
+        tempVec.y -= 0.44f;
+
         audioSource = GetComponent<AudioSource>();
         animator = GetComponent<Animator>();
         rigid = GetComponent<Rigidbody2D>();
         audioSource.Play();
 
-        gameManager = GameObject.FindObjectOfType<GameManager>();
-        
-        if (gameManager.gameIsLoaded)
+        // gameManager = GameObject.FindObjectOfType<GameManager>();
+
+        //if (gameManager.gameIsLoaded)
         {
-            this.transform.position = gameManager.InitialPos();
+            //    this.transform.position = gameManager.InitialPos();
         }
 
     }
@@ -45,15 +61,27 @@ public class BouncingBall : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+
+        //Checks if Blobby is grounded.
+        CheckGrounded();
+
+        tempVec = gameObject.transform.position;
+        tempVec.y -= 0.44f;
+
+        groundCheck.position = tempVec;
+
+        //Rotate the skybox
+        RenderSettings.skybox.SetFloat("_Rotation", Time.time * 4);
+
         // keep rotation 0 alwayes
-        if (transform.rotation.z != 0)
+        if (transform.rotation.z != 0 && !inRockMode)
         {
             transform.rotation = Quaternion.identity;
         }
         // Adjust volume
-        if (audioSource.volume != gameManager.Sound)
+        //  if (audioSource.volume != gameManager.Sound)
         {
-            audioSource.volume = gameManager.Sound;
+            //      audioSource.volume = gameManager.Sound;
         }
 
 
@@ -63,12 +91,13 @@ public class BouncingBall : MonoBehaviour
         Vector3 velocity = new Vector3(0, rigid.velocity.y, 0);
         rigid.velocity = velocity;
 
-        if (Input.GetAxis(key01) == 1 && !isConenctedToRope)
+        if (Input.GetAxis(key01) == 1 && !isConenctedToRope && !hasGroundPound)
         {
             if (inRockMode)
             {
-                transform.Translate(Vector3.right * Time.deltaTime * speed);
-                transform.Rotate(Vector3.forward,  Time.deltaTime * speed);
+                transform.Translate(Vector3.right * Time.deltaTime * speed, Space.World);
+
+                transform.Rotate(Vector3.back * 10, Space.World);
             }
             else
             {
@@ -76,12 +105,12 @@ public class BouncingBall : MonoBehaviour
                 rigid.AddForce(Vector3.right * transformForce, ForceMode2D.Force);
             }
         }
-        if (Input.GetAxis(key02) == 1 && !isConenctedToRope)
+        if (Input.GetAxis(key02) == 1 && !isConenctedToRope && !hasGroundPound)
         {
             if (inRockMode)
             {
-                transform.Translate(Vector3.left * Time.deltaTime * speed);
-                transform.Rotate(Vector3.back, 2.0f * Time.deltaTime * speed);
+                transform.Translate(Vector3.left * Time.deltaTime * speed, Space.World);
+                transform.Rotate(Vector3.forward * 10, Space.World);
             }
             else
             {
@@ -89,6 +118,22 @@ public class BouncingBall : MonoBehaviour
                 rigid.AddForce(Vector3.left * transformForce, ForceMode2D.Force);
             }
         }
+
+        if (Input.GetButtonDown("Jump") && isGrounded && inRockMode)
+        {
+            transform.rotation = Quaternion.identity;
+            rigid.AddForce(Vector3.up * JumpSpeed, ForceMode2D.Force);
+        }
+        else if (Input.GetButtonDown("Down") && !isGrounded && inRockMode)
+        {
+            transform.rotation = Quaternion.identity;
+            GameObject temp = Instantiate(windAnimation, groundCheck.position, groundCheck.rotation);
+            temp.GetComponent<Animator>().SetBool("isReady", true);
+            temp.transform.parent = gameObject.transform;
+            hasGroundPound = true;
+            rigid.AddForce(Vector3.down * 15, ForceMode2D.Impulse);
+        }
+
 
         if (Input.GetKeyDown(KeyCode.Space))
         {
@@ -99,41 +144,38 @@ public class BouncingBall : MonoBehaviour
         }
         if (Input.GetKeyDown(KeyCode.J))
         {
-            rigid.AddForce(Vector3.up * JumpSpeed, ForceMode2D.Force);
+            rigid.AddForce(Vector3.up * JumpSpeed / 2, ForceMode2D.Force);
         }
     }
     private void OnCollisionEnter2D(Collision2D collision)
     {
         hasBounced = true;
-        audioSource.PlayOneShot(bounceSound);
 
-        if (collision.gameObject.tag == "ColliderType1")
+        if (!inRockMode)
         {
-            if (!inRockMode)
+            //Only play bounce sound when in blob mode
+            audioSource.PlayOneShot(bounceSound);
+            
+            if (collision.gameObject.tag == "ColliderType1")
             {
                 rigid.velocity = Vector3.zero;
                 rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
             }
-           
-        }
-        else if (collision.gameObject.tag == "ColliderType2")
-        {
-            if (!inRockMode)
+            else if (collision.gameObject.tag == "ColliderType2")
             {
                 rigid.velocity = Vector3.zero;
                 rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
+
+
+                //rigid.AddForceAtPosition(Vector3.up * force * 15.0f, transform.position, ForceMode2D.Impulse);
+                // Vector3 reflect = Vector3.Reflect(transform.position, Vector3.right);
+
+                //rigid.AddForce(reflect * Time.deltaTime * 5, ForceMode2D.Impulse);
             }
 
-            //rigid.AddForceAtPosition(Vector3.up * force * 15.0f, transform.position, ForceMode2D.Impulse);
-            // Vector3 reflect = Vector3.Reflect(transform.position, Vector3.right);
-
-            //rigid.AddForce(reflect * Time.deltaTime * 5, ForceMode2D.Impulse);
-        }
-
-        else if (collision.gameObject.GetComponent<YelloType>())
-        {
-            if (!inRockMode)
+            else if (collision.gameObject.GetComponent<YelloType>())
             {
+
                 //rigid.AddForceAtPosition(Vector3.up * force, transform.position, ForceMode2D.Impulse);
                 collision.gameObject.GetComponent<Rigidbody2D>().gravityScale = 1;
                 if (collision.gameObject.GetComponent<YelloType>().isCollided)
@@ -141,15 +183,17 @@ public class BouncingBall : MonoBehaviour
                     rigid.velocity = Vector3.zero;
                     rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
                 }
+
             }
         }
-        else if (collision.gameObject.tag == "LooseBorder")
+
+        if (collision.gameObject.tag == "LooseBorder")
         {
-            Debug.Log("Losse by border");
-            GameManager.LevelScore l;
-            l.height = transform.position.y.ToString();
-            l.score = gameManager.Score.ToString();
-            gameManager.Save(l);
+            Debug.Log("Losse yby border");
+            // GameManager.LevelScore l;
+            // l.height = transform.position.y.ToString();
+            // l.score = gameManager.Score.ToString();
+            //  gameManager.Save(l);
             SceneManager.LoadScene("Loose");
 
         }
@@ -181,8 +225,40 @@ public class BouncingBall : MonoBehaviour
             gameObject.GetComponent<CircleCollider2D>().sharedMaterial = null;
         }
 
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            if (inRockMode && hasGroundPound)
+            {
+                Instantiate(explodeParticle, collision.gameObject.transform.position, collision.gameObject.transform.rotation);
+                Destroy(collision.gameObject);
+            }
+            //else
+            //{
+            //    SceneManager.LoadScene("Loose");
+            //}
+        }
+
     }
 
+    /// <summary>
+    /// Checks if Blobby is on ground to prevnt double jumping.
+    /// </summary>
+    private void CheckGrounded()
+    {
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(groundCheck.position, groundCheckRadius);
+        foreach (Collider2D col in colliders)
+        {
+            if (col.gameObject != gameObject)
+            {
+                GameObject temp = GameObject.Find("WindAnimation(Clone)");
+                Destroy(temp);
+                isGrounded = true;
+                hasGroundPound = false;
+                return;
+            }
+        }
+        isGrounded = false;
+    }
 
     private void OnCollisionExit2D(Collision2D collision)
     {

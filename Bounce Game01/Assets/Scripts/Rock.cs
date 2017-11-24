@@ -6,7 +6,7 @@ using UnityEngine;
 public class Rock : MonoBehaviour
 {
     public ParticleSystem glowParticle;
-    public ParticleSystem glowTemp;
+    ParticleSystem glowTemp;
     //ParticleSystem glowParticleSystem;
 
     float originalY;
@@ -14,7 +14,7 @@ public class Rock : MonoBehaviour
     // Use this for initialization
     void Start()
     {
-       // glowParticleSystem = glowParticle.GetComponent<>
+        // glowParticleSystem = glowParticle.GetComponent<>
         this.originalY = gameObject.transform.position.y;
         glowTemp = Instantiate(glowParticle, transform.position, transform.rotation);
         glowTemp.transform.parent = transform;
@@ -23,8 +23,8 @@ public class Rock : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        transform.position = new Vector3(transform.position.x ,(originalY + ((float)Math.Sin(Time.time) * floatStrength)), transform.position.z);
+        transform.position = new Vector3(transform.position.x, (originalY + ((float)Math.Sin(Time.time) * floatStrength)), transform.position.z);
         //glowParticle.transform.position = transform.position;
     }
-    
+
 }
