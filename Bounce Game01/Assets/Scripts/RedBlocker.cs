@@ -29,14 +29,16 @@ public class RedBlocker : MonoBehaviour
 
         if (col.gameObject.CompareTag("Player") && col.gameObject.GetComponent<BouncingBall>().hasRedKey)
         {
+            if (!hasPlayedSound)
+            {
+                audioSource.PlayOneShot(unlockSound);
+                hasPlayedSound = true;
+            }
+
             if (doOnce)
             {
                 print("in player");
-                if (!hasPlayedSound)
-                {
-                    audioSource.PlayOneShot(unlockSound);
-                    hasPlayedSound = true;
-                }
+               
                 foreach (Transform child in transform)
                 {
                     Rigidbody2D rididbody2d = child.gameObject.AddComponent<Rigidbody2D>() as Rigidbody2D;

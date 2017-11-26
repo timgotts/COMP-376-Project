@@ -56,17 +56,17 @@ public class LevelManager : MonoBehaviour {
     public void Setting()
     {
         gameManager.Pause(pauseText);
-        if (soundSlider == null && gameManager.isPause)
-        {
-            GameObject sound = Instantiate(soundObject, new Vector3(-8, 20, 0), Quaternion.identity);
-            soundSlider = sound.GetComponent<SoundSlider>();
-            soundSlider.transform.parent = GameObject.Find("Canvas").transform;
-            RectTransform rect = soundSlider.GetComponent<RectTransform>();
-            rect.localPosition = Vector3.zero;
-        }
-        else
-        {
-            Destroy(soundSlider.gameObject);
-        }
+        //if (soundSlider == null && gameManager.isPause)
+        //{
+        //    GameObject sound = Instantiate(soundObject, new Vector3(-8, 20, 0), Quaternion.identity);
+        //    soundSlider = sound.GetComponent<SoundSlider>();
+        //    soundSlider.transform.parent = GameObject.Find("Canvas").transform;
+        //    RectTransform rect = soundSlider.GetComponent<RectTransform>();
+        //    rect.localPosition = Vector3.zero;
+        //}
+        //else
+        //{
+        //    Destroy(soundSlider.gameObject);
+        //}
     }
 }

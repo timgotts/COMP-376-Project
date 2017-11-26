@@ -27,7 +27,7 @@ public class SandTiles : MonoBehaviour
     {
         if (isCollided)
         {
-            rigid.velocity = new Vector2(0, -2f);
+            rigid.velocity = new Vector2(0, -3);
         }
     }
     private void OnCollisionEnter2D(Collision2D collision)
@@ -35,6 +35,8 @@ public class SandTiles : MonoBehaviour
         if (collision.gameObject.tag == "Player")
         {
             rigid.constraints = RigidbodyConstraints2D.None;
+            rigid.constraints = RigidbodyConstraints2D.FreezeRotation;
+            rigid.constraints = RigidbodyConstraints2D.FreezePositionX;
             rigid.gravityScale = 1;
             isCollided = true;
             Destroy(collider);

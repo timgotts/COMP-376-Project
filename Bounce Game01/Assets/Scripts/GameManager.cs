@@ -73,9 +73,9 @@ public class GameManager : MonoBehaviour
         Time.timeScale = isPause ? 0 : 1;
         
     }
-    public void Loadlevel1(int level)
+    public void Loadlevel1()
     {
-        SceneManager.LoadScene(level);
+        SceneManager.LoadScene("Level01");
     }
     public void Loadlevel2()
     {

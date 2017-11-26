@@ -66,7 +66,7 @@ public class BouncingBall : MonoBehaviour
         rigid = GetComponent<Rigidbody2D>();
         audioSource.Play();
 
-         gameManager = GameObject.FindObjectOfType<GameManager>();
+        gameManager = GameObject.FindObjectOfType<GameManager>();
 
         if (gameManager.gameIsLoaded)
         {
@@ -92,7 +92,7 @@ public class BouncingBall : MonoBehaviour
         groundCheck.position = tempVec;
 
         //Rotate the skybox
-        RenderSettings.skybox.SetFloat("_Rotation", Time.time * 4);
+        //RenderSettings.skybox.SetFloat("_Rotation", Time.time * 4);
 
         // keep rotation 0 alwayes
         if (transform.rotation.z != 0 && !inRockMode)
@@ -209,6 +209,14 @@ public class BouncingBall : MonoBehaviour
                     rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
                 }
             }
+            else if(collision.gameObject.tag == "SandTile")
+            {
+                print("Sand Tile col");
+                
+                rigid.velocity = Vector3.zero;
+                rigid.AddForce(Vector3.up * 7.5f, ForceMode2D.Impulse);
+            }
+
         }
 
         if (collision.gameObject.tag == "LooseBorder")
