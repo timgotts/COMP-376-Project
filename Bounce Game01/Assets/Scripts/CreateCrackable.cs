@@ -7,18 +7,18 @@ public class CreateCrackable : MonoBehaviour {
     public GameObject Object;
     public Transform transform;
     public int numberOfInstant;
-    private GameManager gameManager;
+   // private GameManager gameManager;
     // Use this for initialization
     void Start () {
         CreateDuplicate(numberOfInstant);
-        gameManager = GameObject.FindObjectOfType<GameManager>();
+       // gameManager = GameObject.FindObjectOfType<GameManager>();
     }
 
     private void OnCollisionEnter2D(Collision2D collision)
     {
         if (collision.gameObject.tag == "Player")
         {
-            gameManager.AddScore (1);
+          //  gameManager.AddScore (1);
             gameObject.GetComponent<BoxCollider2D>().enabled = false;
             foreach (Transform child in this.transform)
             {
