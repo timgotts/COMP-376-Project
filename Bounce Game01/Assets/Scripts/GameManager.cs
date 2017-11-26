@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour
     void Start ()
     {
         //Did this for testing
-        SceneManager.LoadScene("Level02");
+        //SceneManager.LoadScene("Level02");
 
         DontDestroyOnLoad(gameObject);        
     }
