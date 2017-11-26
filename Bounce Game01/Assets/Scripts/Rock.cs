@@ -18,6 +18,7 @@ public class Rock : MonoBehaviour
         this.originalY = gameObject.transform.position.y;
         glowTemp = Instantiate(glowParticle, transform.position, transform.rotation);
         glowTemp.transform.parent = transform;
+        glowTemp.transform.localScale = new Vector3(1f,1f,1f);
     }
 
     // Update is called once per frame
