@@ -100,6 +100,7 @@
     <Compile Include="Assets\Scripts\BoxCircle.cs" />
     <Compile Include="Assets\Scripts\CameraManager.cs" />
     <Compile Include="Assets\Scripts\CheckPointManager.cs" />
+    <Compile Include="Assets\Scripts\Compass.cs" />
     <Compile Include="Assets\Scripts\Crackable.cs" />
     <Compile Include="Assets\Scripts\CreateCrackable.cs" />
     <Compile Include="Assets\Scripts\EnemyMove.cs" />

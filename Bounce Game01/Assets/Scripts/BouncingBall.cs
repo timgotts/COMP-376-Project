@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using UnityEngine;
 
 public class BouncingBall : MonoBehaviour
@@ -15,6 +16,7 @@ public class BouncingBall : MonoBehaviour
     public bool canOverJump = false;
     public GameObject bouncebox;
     public GameObject rockPowerUpContainer;
+    public GameObject camera;
     private Rigidbody2D rigid;
 
     AudioSource audioSource;
@@ -23,7 +25,9 @@ public class BouncingBall : MonoBehaviour
     bool hasBounced = false;
     private GameManager gameManager;
     private bool isConenctedToRope = false;
-
+    private bool rotateCamera = false;
+    public bool rotateCameraLeft = true;
+    private float rotationsPerMinute = -1.0f;
     float mIdleTime = 10.0f;
     float mTimer = 0.0f;
     /// <summary>
@@ -68,7 +72,14 @@ public class BouncingBall : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+        // Set the camera rotation zero
+        if (camera != null)
+        {
+           camera.transform.localEulerAngles = new Vector3(0, 0, 0);
+        }
 
+        // Set the color to green
+        GetComponent<SpriteRenderer>().color = new Color(0.0f, 1.0f, 0.0f, 1.0f);
         tempVec = gameObject.transform.position;
         tempVec.y -= 0.44f;
 
@@ -87,8 +98,8 @@ public class BouncingBall : MonoBehaviour
         // initialize the bounce boxe
         if (level == 1)
         {
-            BounceBoxesLevel1 = new BounecBox[5];
-            for (int i = 0; i < 5; ++i)
+            BounceBoxesLevel1 = new BounecBox[6];
+            for (int i = 0; i < 6; ++i)
             {
                 GameObject bonce = GameObject.Find("Box_Circle_" + i);
                 BounceBoxesLevel1[i] = new BounecBox { timeOfDead = 0f, isAlive = true, boxCircle = bonce, pos = bonce.transform.position };
@@ -101,10 +112,48 @@ public class BouncingBall : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+       
+
         // Check bounce boxes in level 1
         if (level == 1)
         {
             CheckNumberOfBoxCircles();
+            // Rotate camera
+            if (rotateCamera && camera != null && !canOverJump)
+            {
+                if (rotateCameraLeft)
+                {
+                    //float zRotation = Mathf.PingPong(Time.time * rotationsPerMinute, 90f);
+                    Quaternion newRotation = Quaternion.AngleAxis(90, new Vector3(0, 0, 1));
+                    camera.transform.rotation = Quaternion.Slerp(camera.transform.rotation, newRotation, .0005f);
+                    //Debug.Log("z: " + camera.transform.rotation.eulerAngles.z);
+                    if (camera.transform.rotation.eulerAngles.z >= 89)
+                    {
+                        //Debug.Log("z positive: " + camera.transform.rotation.z);
+                        rotateCameraLeft = false;
+                    }
+                }
+                else
+                {
+                    //float zRotation = Mathf.PingPong(Time.time * rotationsPerMinute, 90f);
+                    Quaternion newRotation = Quaternion.AngleAxis(-90, new Vector3(0, 0, 1));
+                    camera.transform.rotation = Quaternion.Slerp(camera.transform.rotation, newRotation, .0005f);
+                    //Debug.Log("z manfi: " + camera.transform.rotation.eulerAngles.z);
+                    if (camera.transform.rotation.eulerAngles.z >= 269)
+                    {
+                        rotateCameraLeft = true;
+                        // Debug.Log("z negative: " + camera.transform.rotation.z);
+                    }
+                }
+
+                GameObject.Find("Image_Compass").GetComponent<Image>().GetComponent<Image>().color = new Color32(255, 255, 225, 225);
+                GameObject.Find("Arrow_Compass").GetComponent<Image>().GetComponent<Image>().color = new Color32(255, 255, 225, 225);
+            }
+            else
+            {
+                GameObject.Find("Image_Compass").GetComponent<Image>().GetComponent<Image>().color = new Color32(255, 255, 225, 0);
+                GameObject.Find("Arrow_Compass").GetComponent<Image>().GetComponent<Image>().color = new Color32(255, 255, 225, 0);
+            }
         }
 
         if (isDead)
@@ -388,6 +437,11 @@ public class BouncingBall : MonoBehaviour
     /// <param name="collision"></param>
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        // Rotate the camera
+        if (collision.gameObject.name.Contains("RotateCamera"))
+        {
+            rotateCamera = true;
+        }
         if (collision.gameObject.tag == "LeftRotateCollider")
         {
             rigid.velocity = Vector3.zero;
@@ -419,18 +473,26 @@ public class BouncingBall : MonoBehaviour
     {
         if (canOverJump)
         {
+            // Set the camera rotation zero
+            if (camera != null)
+            {
+                camera.transform.localEulerAngles = new Vector3(0, 0, 0);
+                rotateCamera = false;
+            }
             mTimer += Time.deltaTime;
             if (mTimer >= mIdleTime)
             {
                 canOverJump = false;
                 mTimer = 0;
+                // Set the color to Green
+               GetComponent<SpriteRenderer>().color = new Color(0.0f, 1.0f, 0.0f, 1.0f);
             }
         }
     }
 
     private void CheckNumberOfBoxCircles ()
     {
-        for (int i = 0; i < 5; ++i)
+        for (int i = 0; i < 6; ++i)
         {
             GameObject bonce = GameObject.Find("Box_Circle_" + i);
             if (bonce == null)
