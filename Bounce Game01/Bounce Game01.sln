@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2017
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bounce Game01", "Bounce Game01.csproj", "{A139466A-C981-D085-8E58-3BCA0EDE2822}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Bounce Game01.Editor", "Bounce Game01.Editor.csproj", "{7D337230-7656-019A-C4CE-2D7A18664F71}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -13,6 +15,10 @@ Global
 		{A139466A-C981-D085-8E58-3BCA0EDE2822}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A139466A-C981-D085-8E58-3BCA0EDE2822}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A139466A-C981-D085-8E58-3BCA0EDE2822}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7D337230-7656-019A-C4CE-2D7A18664F71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7D337230-7656-019A-C4CE-2D7A18664F71}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7D337230-7656-019A-C4CE-2D7A18664F71}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7D337230-7656-019A-C4CE-2D7A18664F71}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

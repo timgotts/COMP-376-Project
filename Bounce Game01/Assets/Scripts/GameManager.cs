@@ -24,7 +24,11 @@ public class GameManager : MonoBehaviour
     {
         LoadBestScore();
     }
-    void Start () {
+    void Start ()
+    {
+        //Did this for testing
+        //SceneManager.LoadScene("Level02");
+
         DontDestroyOnLoad(gameObject);        
     }
 	
@@ -69,10 +73,19 @@ public class GameManager : MonoBehaviour
         Time.timeScale = isPause ? 0 : 1;
         
     }
-    public void Loadlevel(int level)
+    public void Loadlevel(int lev)
     {
-        SceneManager.LoadScene(level);
+        SceneManager.LoadScene(lev);
     }
+    public void Loadlevel1()
+    {
+        SceneManager.LoadScene("Level01");
+    }
+    public void Loadlevel2()
+    {
+        SceneManager.LoadScene("Level02");
+    }
+
 
     public void Save(LevelScore gd)
     {

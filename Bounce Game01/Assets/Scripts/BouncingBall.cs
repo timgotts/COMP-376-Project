@@ -5,13 +5,16 @@ using UnityEngine;
 
 public class BouncingBall : MonoBehaviour
 {
-
+    public int level = 1;
     public string key01;
     public string key02;
     public float speed;
     public float force = 7;
     public float transformForce = 3;
     public float JumpSpeed = 200;
+    public bool canOverJump = false;
+    public GameObject bouncebox;
+    public GameObject rockPowerUpContainer;
     private Rigidbody2D rigid;
 
     AudioSource audioSource;
@@ -20,48 +23,171 @@ public class BouncingBall : MonoBehaviour
     bool hasBounced = false;
     private GameManager gameManager;
     private bool isConenctedToRope = false;
+
+    float mIdleTime = 10.0f;
+    float mTimer = 0.0f;
+    /// <summary>
+    /// All the audio clips
+    /// </summary>
+    public AudioClip rockExplosion;
+    public AudioClip powerUpLost;
+
+
+    //Tarik rock stuff
+    public GameObject windAnimation;
+    bool inRockMode = false;
+    bool hasJumped = false;
+    bool hasGroundPound = false;
+
+    public Transform groundCheck;
+    Vector3 tempVec;
+    bool isGrounded = false;
+    float groundCheckRadius = 0.5f;
+
+    public GameObject respawnParticle;
+
+    bool isDead = false;
+
+    public GameObject currentCheckpoint;
+
+    public PhysicsMaterial2D bounciness;
+
+    public AudioClip keyPickUpSound;
+    public bool hasRedKey = false;
+
+    // This struct will be used for chaking the number of bounce in the level 1
+    public struct BounecBox
+    {
+        public float timeOfDead;
+        public bool isAlive;
+        public GameObject boxCircle;
+        public Vector3 pos;
+    }
+    private BounecBox[] BounceBoxesLevel1;
+
     // Use this for initialization
     void Start()
-    {        
+    {
+
+        tempVec = gameObject.transform.position;
+        tempVec.y -= 0.44f;
+
         audioSource = GetComponent<AudioSource>();
         animator = GetComponent<Animator>();
         rigid = GetComponent<Rigidbody2D>();
         audioSource.Play();
+
         gameManager = GameObject.FindObjectOfType<GameManager>();
+
         if (gameManager.gameIsLoaded)
         {
-            this.transform.position = gameManager.InitialPos();
+                this.transform.position = gameManager.InitialPos();
         }
-        
+
+        // initialize the bounce boxe
+        if (level == 1)
+        {
+            BounceBoxesLevel1 = new BounecBox[5];
+            for (int i = 0; i < 5; ++i)
+            {
+                GameObject bonce = GameObject.Find("Box_Circle_" + i);
+                BounceBoxesLevel1[i] = new BounecBox { timeOfDead = 0f, isAlive = true, boxCircle = bonce, pos = bonce.transform.position };
+            }
+        }
+
+
     }
 
     // Update is called once per frame
     void Update()
     {
+        // Check bounce boxes in level 1
+        if (level == 1)
+        {
+            CheckNumberOfBoxCircles();
+        }
+
+        if (isDead)
+        {
+
+        }
+
+        //Checks if Blobby is grounded.
+        CheckGrounded();
+
+        tempVec = gameObject.transform.position;
+        tempVec.y -= 0.44f;
+
+        groundCheck.position = tempVec;
+
+        //Rotate the skybox
+        //RenderSettings.skybox.SetFloat("_Rotation", Time.time * 4);
+
         // keep rotation 0 alwayes
-        if (transform.rotation.z !=0)
+        if (transform.rotation.z != 0 && !inRockMode)
         {
             transform.rotation = Quaternion.identity;
         }
         // Adjust volume
-        if (audioSource.volume != gameManager.Sound)
+          if (audioSource.volume != gameManager.Sound)
         {
-            audioSource.volume = gameManager.Sound;
+                  audioSource.volume = gameManager.Sound;
         }
-        
-        
+
+
         animator.SetBool("hasBounced", hasBounced);
+        animator.SetBool("inRockMode", inRockMode);
+
         Vector3 velocity = new Vector3(0, rigid.velocity.y, 0);
         rigid.velocity = velocity;
-        if (Input.GetAxis(key01) == 1 && !isConenctedToRope)
+
+        if (Input.GetAxis(key01) == 1 && !isConenctedToRope && !hasGroundPound)
         {
-            transform.Translate(Vector3.right * Time.deltaTime * speed);           
-            rigid.AddForce(Vector3.right * transformForce, ForceMode2D.Force);
+            if (inRockMode)
+            {
+                transform.Translate(Vector3.right * Time.deltaTime * speed, Space.World);
+
+                transform.Rotate(Vector3.back * 10, Space.World);
+            }
+            else
+            {
+                transform.Translate(Vector3.right * Time.deltaTime * speed);
+                rigid.AddForce(Vector3.right * transformForce, ForceMode2D.Force);
+            }
         }
-        if (Input.GetAxis(key02) == 1 && !isConenctedToRope)
+        if (Input.GetAxis(key02) == 1 && !isConenctedToRope && !hasGroundPound)
         {
-            transform.Translate(Vector3.left * Time.deltaTime * speed);
-            rigid.AddForce(Vector3.left * transformForce, ForceMode2D.Force);
+            if (inRockMode)
+            {
+                transform.Translate(Vector3.left * Time.deltaTime * speed, Space.World);
+                transform.Rotate(Vector3.forward * 10, Space.World);
+            }
+            else
+            {
+                transform.Translate(Vector3.left * Time.deltaTime * speed);
+                rigid.AddForce(Vector3.left * transformForce, ForceMode2D.Force);
+            }
+        }
+
+        if (Input.GetButtonDown("Jump") && isGrounded && inRockMode)
+        {
+            transform.rotation = Quaternion.identity;
+            rigid.AddForce(Vector3.up * JumpSpeed * 1.5f, ForceMode2D.Force);
+        }
+        else if (Input.GetButtonDown("Down") && !isGrounded && inRockMode)
+        {
+            hasGroundPound = true;
+            transform.rotation = Quaternion.identity;
+            GameObject temp = Instantiate(windAnimation, groundCheck.position, groundCheck.rotation);
+            temp.GetComponent<Animator>().SetBool("isReady", true);
+            temp.transform.parent = gameObject.transform;
+
+            rigid.AddForce(Vector3.down * 15, ForceMode2D.Impulse);
+        }
+
+        if (Input.GetKeyDown(KeyCode.L) && inRockMode)
+        {
+            GiveUpPower();
         }
 
         if (Input.GetKeyDown(KeyCode.Space))
@@ -71,75 +197,195 @@ public class BouncingBall : MonoBehaviour
             this.transform.parent = null;
             isConenctedToRope = false;
         }
-        if (Input.GetKeyDown(KeyCode.J))
+        CheckTimeForOverJump();
+        if (Input.GetKeyDown(KeyCode.J) && canOverJump)
         {
-            rigid.AddForce(Vector3.up * JumpSpeed, ForceMode2D.Force);
+            rigid.AddForce(Vector3.up * JumpSpeed / 2, ForceMode2D.Force);
         }
     }
     private void OnCollisionEnter2D(Collision2D collision)
     {
         hasBounced = true;
-        audioSource.PlayOneShot(bounceSound);
 
-        if (collision.gameObject.tag == "ColliderType1")
+        if (!inRockMode)
         {
-            rigid.velocity = Vector3.zero;
-            rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
-        }
-        else if (collision.gameObject.tag == "ColliderType2")
-        {
-            rigid.velocity = Vector3.zero;
-            rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
+            //Only play bounce sound when in blob mode
+            audioSource.PlayOneShot(bounceSound);
 
-            //rigid.AddForceAtPosition(Vector3.up * force * 15.0f, transform.position, ForceMode2D.Impulse);
-            // Vector3 reflect = Vector3.Reflect(transform.position, Vector3.right);
-
-            //rigid.AddForce(reflect * Time.deltaTime * 5, ForceMode2D.Impulse);
-        }
-
-        else if (collision.gameObject.GetComponent<YelloType>())
-        {
-
-            //rigid.AddForceAtPosition(Vector3.up * force, transform.position, ForceMode2D.Impulse);
-            collision.gameObject.GetComponent<Rigidbody2D>().gravityScale = 1;
-            if (collision.gameObject.GetComponent<YelloType>().isCollided)
+            if (collision.gameObject.tag == "ColliderType1")
             {
                 rigid.velocity = Vector3.zero;
                 rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
             }
+            else if (collision.gameObject.tag == "ColliderType2")
+            {
+                rigid.velocity = Vector3.zero;
+                rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
+
+
+                //rigid.AddForceAtPosition(Vector3.up * force * 15.0f, transform.position, ForceMode2D.Impulse);
+                // Vector3 reflect = Vector3.Reflect(transform.position, Vector3.right);
+
+                //rigid.AddForce(reflect * Time.deltaTime * 5, ForceMode2D.Impulse);
+            }
+
+            else if (collision.gameObject.GetComponent<YelloType>())
+            {
+                //rigid.AddForceAtPosition(Vector3.up * force, transform.position, ForceMode2D.Impulse);
+                collision.gameObject.GetComponent<Rigidbody2D>().gravityScale = 1;
+                if (collision.gameObject.GetComponent<YelloType>().isCollided)
+                {
+                    rigid.velocity = Vector3.zero;
+                    rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
+                }
+            }
+            else if(collision.gameObject.tag == "SandTile")
+            {
+                print("Sand Tile col");
+                
+                rigid.velocity = Vector3.zero;
+                rigid.AddForce(Vector3.up * 7.5f, ForceMode2D.Impulse);
+            }
 
         }
-        else if (collision.gameObject.tag == "LooseBorder")
+
+        if (collision.gameObject.tag == "LooseBorder")
         {
-            Debug.Log("Losse by border");
-            GameManager.LevelScore l;
-            l.height = transform.position.y.ToString();
-            l.score = gameManager.Score.ToString();
-            gameManager.Save(l);
-            SceneManager.LoadScene("Loose");
+            //Debug.Log("Losse yby border");
+             GameManager.LevelScore l;
+             l.height = transform.position.y.ToString();
+             l.score = gameManager.Score.ToString();
+             gameManager.Save(l);
+
+            Respawn();
+            // SceneManager.LoadScene("Loose");
 
         }
         else if (collision.gameObject.tag == "Bomb")
         {
-            Debug.Log("Losse by bomb");
+            //Debug.Log("Losse by bomb");
             //gameManager.Save(transform.position.y.ToString());
             //Time.timeScale = 0;
-            SceneManager.LoadScene("Loose");
+
+            Respawn();
+            //SceneManager.LoadScene("Loose");
 
         }
         else if (collision.gameObject.tag == "Hook" && Input.GetKey(KeyCode.A))
         {
-            isConenctedToRope = true;
-            rigid.bodyType = RigidbodyType2D.Kinematic;
-            this.transform.parent = collision.gameObject.transform;
+            if (!inRockMode)
+            {
+                isConenctedToRope = true;
+                rigid.bodyType = RigidbodyType2D.Kinematic;
+                this.transform.parent = collision.gameObject.transform;
+            }
+        }
+
+        if (collision.gameObject.CompareTag("Enemy"))
+        {
+            if (hasGroundPound)
+            {
+                audioSource.PlayOneShot(rockExplosion);
+                collision.gameObject.GetComponent<EnemyMove>().isDead = true;
+            }
+            else if (inRockMode)
+            {
+                GiveUpPower();
+            }
+            else
+            {
+                Respawn();
+                //SceneManager.LoadScene("Loose");
+            }
         }
     }
 
+    /// <summary>
+    /// Respawns player at checkpoint
+    /// </summary>
+    void Respawn()
+    {
+        transform.position = currentCheckpoint.transform.position;
+        Instantiate(respawnParticle, gameObject.transform.position, gameObject.transform.rotation);
+    }
 
+    /// <summary>
+    /// Checks if Blobby is on ground to prevnt double jumping.
+    /// </summary>
+    private void CheckGrounded()
+    {
+        Collider2D[] colliders = Physics2D.OverlapCircleAll(groundCheck.position, groundCheckRadius);
+        foreach (Collider2D col in colliders)
+        {
+            if (col.gameObject != gameObject && !col.gameObject.CompareTag("Enemy"))
+            {
+                GameObject temp = GameObject.Find("WindAnimation(Clone)");
+                Destroy(temp);
+                isGrounded = true;
+
+                if (hasGroundPound)
+                {
+                    audioSource.PlayOneShot(rockExplosion);
+                }
+
+                hasGroundPound = false;
+                return;
+            }
+        }
+        isGrounded = false;
+    }
+
+    void SetRockMode()
+    {
+        inRockMode = true;
+
+        //Turn bounciness off
+        gameObject.GetComponent<CircleCollider2D>().sharedMaterial = null;
+        rigid.gravityScale = 3;
+    }
+
+    void setBlobMode()
+    {
+        inRockMode = false;
+        rigid.gravityScale = 1;
+
+        //Turn Bounciness off.
+
+        rigid.AddForce(Vector3.up * 0.5f, ForceMode2D.Impulse);
+
+        //Turn bounciness on.
+        gameObject.GetComponent<CircleCollider2D>().sharedMaterial = bounciness;
+
+        foreach (Transform rockChild in rockPowerUpContainer.transform)
+        {
+            rockChild.gameObject.SetActive(true);
+        }
+
+    }
+
+    /// <summary>
+    /// Gives up the power up obtained
+    /// </summary>
+    private void GiveUpPower()
+    {
+        audioSource.PlayOneShot(powerUpLost);
+        setBlobMode();
+    }
+
+    /// <summary>
+    /// Sets has bounced to false in order to play the 
+    /// appropriate animation
+    /// </summary>
+    /// <param name="collision"></param>
     private void OnCollisionExit2D(Collision2D collision)
     {
         hasBounced = false;
     }
+
+    /// <summary>
+    /// Checks if the collider caused a trigger.
+    /// </summary>
+    /// <param name="collision"></param>
     private void OnTriggerEnter2D(Collider2D collision)
     {
         if (collision.gameObject.tag == "LeftRotateCollider")
@@ -149,6 +395,54 @@ public class BouncingBall : MonoBehaviour
             rigid.velocity = Vector3.zero;
             rigid.AddForce(Vector3.up * 10, ForceMode2D.Impulse);
         }
-        //Debug.Log("leftcollider");
+
+        if (collision.gameObject.CompareTag("Rock"))
+        {
+            SetRockMode();
+            rigid.gravityScale = 3;
+
+            foreach (Transform rockChild in rockPowerUpContainer.transform)
+            {
+                rockChild.gameObject.SetActive(false);
+            }
+        }
+
+        if (collision.gameObject.CompareTag("RedKey"))
+        {
+            audioSource.PlayOneShot(keyPickUpSound);
+            hasRedKey = true;
+            Destroy(collision.gameObject);
+        }
+    }
+
+    private void CheckTimeForOverJump()
+    {
+        if (canOverJump)
+        {
+            mTimer += Time.deltaTime;
+            if (mTimer >= mIdleTime)
+            {
+                canOverJump = false;
+                mTimer = 0;
+            }
+        }
+    }
+
+    private void CheckNumberOfBoxCircles ()
+    {
+        for (int i = 0; i < 5; ++i)
+        {
+            GameObject bonce = GameObject.Find("Box_Circle_" + i);
+            if (bonce == null)
+            {
+                BounceBoxesLevel1[i].timeOfDead += Time.deltaTime;
+                if (BounceBoxesLevel1[i].timeOfDead >= 4)
+                {
+                    BounceBoxesLevel1[i].timeOfDead = 0;
+                    bonce = Instantiate(bouncebox, BounceBoxesLevel1[i].pos, Quaternion.identity);
+                    bonce.name = "Box_Circle_" + i.ToString();
+                }               
+            }
+        }
     }
 }
