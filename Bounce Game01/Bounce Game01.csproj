@@ -108,6 +108,7 @@
     <Compile Include="Assets\Scripts\ExplodePartilceManager.cs" />
     <Compile Include="Assets\Scripts\GameManager.cs" />
     <Compile Include="Assets\Scripts\GameOver.cs" />
+    <Compile Include="Assets\Scripts\Lava.cs" />
     <Compile Include="Assets\Scripts\LevelManager.cs" />
     <Compile Include="Assets\Scripts\MenuMouseHover.cs" />
     <Compile Include="Assets\Scripts\RedBlocker.cs" />
