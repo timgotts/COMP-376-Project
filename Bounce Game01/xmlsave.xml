@@ -1,8 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LevelScore xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+<<<<<<< HEAD
   <level>2</level>
   <pozX>6.3</pozX>
   <pozY>11.31</pozY>
   <pozZ>0</pozZ>
+=======
+  <height>79.34998</height>
+>>>>>>> 990431f607f71a4d8b79bfde1809f465052f8456
   <score>2</score>
 </LevelScore>
