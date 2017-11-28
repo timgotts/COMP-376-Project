@@ -1,19 +1,22 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 using UnityEngine;
 
 public class BouncingBall : MonoBehaviour
 {
-
+    public int level = 1;
     public string key01;
     public string key02;
     public float speed;
     public float force = 7;
     public float transformForce = 3;
     public float JumpSpeed = 200;
-
+    public bool canOverJump = false;
+    public GameObject bouncebox;
     public GameObject rockPowerUpContainer;
+    public GameObject camera;
     private Rigidbody2D rigid;
 
     AudioSource audioSource;
@@ -22,8 +25,11 @@ public class BouncingBall : MonoBehaviour
     bool hasBounced = false;
     private GameManager gameManager;
     private bool isConenctedToRope = false;
-
-
+    private bool rotateCamera = false;
+    public bool rotateCameraLeft = true;
+    private float rotationsPerMinute = -1.0f;
+    float mIdleTime = 10.0f;
+    float mTimer = 0.0f;
     /// <summary>
     /// All the audio clips
     /// </summary>
@@ -53,11 +59,27 @@ public class BouncingBall : MonoBehaviour
     public AudioClip keyPickUpSound;
     public bool hasRedKey = false;
 
+    // This struct will be used for chaking the number of bounce in the level 1
+    public struct BounecBox
+    {
+        public float timeOfDead;
+        public bool isAlive;
+        public GameObject boxCircle;
+        public Vector3 pos;
+    }
+    private BounecBox[] BounceBoxesLevel1;
 
     // Use this for initialization
     void Start()
     {
+        // Set the camera rotation zero
+        if (camera != null)
+        {
+           camera.transform.localEulerAngles = new Vector3(0, 0, 0);
+        }
 
+        // Set the color to green
+        GetComponent<SpriteRenderer>().color = new Color(0.0f, 1.0f, 0.0f, 1.0f);
         tempVec = gameObject.transform.position;
         tempVec.y -= 0.44f;
 
@@ -67,16 +89,67 @@ public class BouncingBall : MonoBehaviour
         audioSource.Play();
 
         gameManager = GameObject.FindObjectOfType<GameManager>();
-
         if (gameManager.gameIsLoaded)
         {
                 this.transform.position = gameManager.InitialPos();
+        }
+
+        // initialize the bounce boxe
+        if (level == 1)
+        {
+            BounceBoxesLevel1 = new BounecBox[6];
+            for (int i = 0; i < 6; ++i)
+            {
+                GameObject bonce = GameObject.Find("Box_Circle_" + i);
+                BounceBoxesLevel1[i] = new BounecBox { timeOfDead = 0f, isAlive = true, boxCircle = bonce, pos = bonce.transform.position };
+            }
         }
     }
 
     // Update is called once per frame
     void Update()
     {
+       
+
+        // Check bounce boxes in level 1
+        if (level == 1)
+        {
+            CheckNumberOfBoxCircles();
+            // Rotate camera
+            if (rotateCamera && camera != null && !canOverJump)
+            {
+                if (rotateCameraLeft)
+                {
+                    //float zRotation = Mathf.PingPong(Time.time * rotationsPerMinute, 90f);
+                    Quaternion newRotation = Quaternion.AngleAxis(90, new Vector3(0, 0, 1));
+                    camera.transform.rotation = Quaternion.Slerp(camera.transform.rotation, newRotation, .0005f);
+                    //Debug.Log("z: " + camera.transform.rotation.eulerAngles.z);
+                    if (camera.transform.rotation.eulerAngles.z >= 89)
+                    {
+                        //Debug.Log("z positive: " + camera.transform.rotation.z);
+                        rotateCameraLeft = false;
+                    }
+                }
+                else
+                {
+                    //float zRotation = Mathf.PingPong(Time.time * rotationsPerMinute, 90f);
+                    Quaternion newRotation = Quaternion.AngleAxis(-90, new Vector3(0, 0, 1));
+                    camera.transform.rotation = Quaternion.Slerp(camera.transform.rotation, newRotation, .0005f);
+                    if (camera.transform.rotation.eulerAngles.z >= 269)
+                    {
+                        rotateCameraLeft = true;
+                    }
+                }
+
+                GameObject.Find("Image_Compass").GetComponent<Image>().GetComponent<Image>().color = new Color32(255, 255, 225, 225);
+                GameObject.Find("Arrow_Compass").GetComponent<Image>().GetComponent<Image>().color = new Color32(255, 255, 225, 225);
+            }
+            else
+            {
+                GameObject.Find("Image_Compass").GetComponent<Image>().GetComponent<Image>().color = new Color32(255, 255, 225, 0);
+                GameObject.Find("Arrow_Compass").GetComponent<Image>().GetComponent<Image>().color = new Color32(255, 255, 225, 0);
+            }
+        }
 
         if (isDead)
         {
@@ -168,7 +241,8 @@ public class BouncingBall : MonoBehaviour
             this.transform.parent = null;
             isConenctedToRope = false;
         }
-        if (Input.GetKeyDown(KeyCode.J))
+        CheckTimeForOverJump();
+        if (Input.GetKeyDown(KeyCode.J) && canOverJump)
         {
             rigid.AddForce(Vector3.up * JumpSpeed / 2, ForceMode2D.Force);
         }
@@ -358,6 +432,11 @@ public class BouncingBall : MonoBehaviour
     /// <param name="collision"></param>
     private void OnTriggerEnter2D(Collider2D collision)
     {
+        // Rotate the camera
+        if (collision.gameObject.name.Contains("RotateCamera"))
+        {
+            rotateCamera = true;
+        }
         if (collision.gameObject.tag == "LeftRotateCollider")
         {
             rigid.velocity = Vector3.zero;
@@ -387,6 +466,45 @@ public class BouncingBall : MonoBehaviour
         if (collision.gameObject.CompareTag("WinPortal"))
         {
             SceneManager.LoadScene("Win");
+        }
+    }
+
+    private void CheckTimeForOverJump()
+    {
+        if (canOverJump)
+        {
+            // Set the camera rotation zero
+            if (camera != null)
+            {
+                camera.transform.localEulerAngles = new Vector3(0, 0, 0);
+                rotateCamera = false;
+            }
+            mTimer += Time.deltaTime;
+            if (mTimer >= mIdleTime)
+            {
+                canOverJump = false;
+                mTimer = 0;
+                // Set the color to Green
+               GetComponent<SpriteRenderer>().color = new Color(0.0f, 1.0f, 0.0f, 1.0f);
+            }
+        }
+    }
+
+    private void CheckNumberOfBoxCircles ()
+    {
+        for (int i = 0; i < 6; ++i)
+        {
+            GameObject bonce = GameObject.Find("Box_Circle_" + i);
+            if (bonce == null)
+            {
+                BounceBoxesLevel1[i].timeOfDead += Time.deltaTime;
+                if (BounceBoxesLevel1[i].timeOfDead >= 4)
+                {
+                    BounceBoxesLevel1[i].timeOfDead = 0;
+                    bonce = Instantiate(bouncebox, BounceBoxesLevel1[i].pos, Quaternion.identity);
+                    bonce.name = "Box_Circle_" + i.ToString();
+                }               
+            }
         }
     }
 }
