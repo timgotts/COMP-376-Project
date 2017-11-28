@@ -8,6 +8,7 @@ public class MenuMouseHover : MonoBehaviour {
     SpriteRenderer spriterenderer;
     public AudioClip clip;
     public int level = 1;
+    public bool loadFromLastLevel = false;
     private GameManager manager;
     public GameObject blobi;
     private AudioSource audio;
@@ -36,7 +37,18 @@ public class MenuMouseHover : MonoBehaviour {
     }
     private void OnMouseDown()
     {
-        manager.Loadlevel(level);
+        if (loadFromLastLevel)
+        {
+            int formerLevel = manager.lastLevel;
+            manager.loadFromlastScene = true;
+            manager.Loadlevel(formerLevel);
+        }
+        else
+        {
+            manager.loadFromlastScene = false;
+            manager.Loadlevel(level);
+        }
+        
     }
     private void OnMouseExit()
     {

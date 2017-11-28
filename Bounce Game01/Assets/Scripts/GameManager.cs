@@ -10,14 +10,19 @@ public class GameManager : MonoBehaviour
 {
     public struct LevelScore
     {
-        public string height;
+        public string level;
+        public string pozX;
+        public string pozY;
+        public string pozZ;
         public string score;
     };
+    public bool loadFromlastScene = false; 
     public bool isPause = false;
     private float soundVolume = 0.6f;
     private int score = 0;
     public int bestscore = 0;
-    public float lastPos = 0;
+    public int lastLevel = 1;
+    public Vector3 lastPos;
     public bool gameIsLoaded = false;
     // Use this for initialization
     private void Awake()
@@ -32,11 +37,6 @@ public class GameManager : MonoBehaviour
         DontDestroyOnLoad(gameObject);        
     }
 	
-	//// Update is called once per frame
-	//void Update ()
- //   {
-		
-	//}
     public int Score
     {
         get
@@ -85,6 +85,7 @@ public class GameManager : MonoBehaviour
 
     public void Save(LevelScore gd)
     {
+        Debug.Log("from game manager: " + gd.pozY);
         if (score > bestscore)
         {
             bestscore = score;
@@ -106,14 +107,18 @@ public class GameManager : MonoBehaviour
     public void Load()
     {
         gameIsLoaded = true;
-        string gd;
-        XmlSerializer ser = new XmlSerializer(typeof(string));
+        LevelScore gd;
+        XmlSerializer ser = new XmlSerializer(typeof(LevelScore));
         using (var reader = new StreamReader(File.Open("xmlsave.xml", FileMode.Open)))
         {
-            gd = ser.Deserialize(reader) as string;
-            lastPos = float.Parse(gd);
-            SceneManager.LoadScene(1);
-        }
+            gd = (LevelScore)ser.Deserialize(reader);
+            bestscore = int.Parse(gd.score);
+            lastPos.x = float.Parse(gd.pozX);
+            lastPos.y = float.Parse(gd.pozY);
+            lastPos.z = float.Parse(gd.pozZ);
+            lastLevel = int.Parse(gd.level);
+            SceneManager.LoadScene(lastLevel);
+        }      
     }
     public void LoadBestScore()
     {
@@ -122,39 +127,17 @@ public class GameManager : MonoBehaviour
         using (var reader = new StreamReader(File.Open("xmlsave.xml", FileMode.Open)))
         {
             gd = (LevelScore)ser.Deserialize(reader);
-            // lastPos = float.Parse(LevelScore);
             bestscore =int.Parse (gd.score);
+            lastPos.x = float.Parse(gd.pozX);
+            lastPos.y = float.Parse(gd.pozY);
+            lastPos.z = float.Parse(gd.pozZ);
+            lastLevel = int.Parse(gd.level);
         }
     }
     public Vector3 InitialPos()
     {
         gameIsLoaded = false;
-        int y = (int)lastPos;
-        if (y <= 5)
-        {
-            return new Vector3(1.58f, -0.91f, 0);
-        }
-        else if (y > 5 && y <= 20)
-        {
-            return new Vector3(5.24f, 9.09f, 0);
-        }
-        else if (y > 20 && y <= 48)
-        {
-            return new Vector3(-5.49f, 24.11f, 0);
-        }
-        else if (y > 50 && y <= 80)
-        {
-            return new Vector3(4.25f, 52.02f, 0);
-        }
-        else if (y > 80)
-        {
-            return new Vector3(7.44f, 82.28f, 0);
-        }
-        else
-        {
-            return new Vector3(1.58f, -0.91f, 0);
-        }
-
+        return lastPos;
     }
     public void Loadlevel(int lev)
     {
