@@ -83,6 +83,7 @@ public class BouncingBall : MonoBehaviour
     // Use this for initialization
     void Start()
     {
+
         // Set the camera rotation zero
         if (camera != null)
         {
@@ -103,6 +104,11 @@ public class BouncingBall : MonoBehaviour
         if (gameManager.gameIsLoaded)
         {
                 this.transform.position = gameManager.InitialPos();
+        }
+        // Set the position if last level is loaded
+        if (gameManager.loadFromlastScene)
+        {
+            transform.position = gameManager.lastPos;
         }
 
         // initialize the bounce boxe
@@ -193,11 +199,6 @@ public class BouncingBall : MonoBehaviour
 
         animator.SetBool("hasBounced", hasBounced);
         animator.SetBool("inRockMode", inRockMode);
-
-        
-        //Vector3 velocity = new Vector3(0, rigid.velocity.y, 0);
-        //rigid.velocity = velocity;
-
 
         if (!isSwinging)
         {
@@ -296,12 +297,6 @@ public class BouncingBall : MonoBehaviour
             {
                 rigid.velocity = Vector3.zero;
                 rigid.AddForce(Vector3.up * force, ForceMode2D.Impulse);
-
-
-                //rigid.AddForceAtPosition(Vector3.up * force * 15.0f, transform.position, ForceMode2D.Impulse);
-                // Vector3 reflect = Vector3.Reflect(transform.position, Vector3.right);
-
-                //rigid.AddForce(reflect * Time.deltaTime * 5, ForceMode2D.Impulse);
             }
 
             else if (collision.gameObject.GetComponent<YelloType>())
@@ -326,12 +321,7 @@ public class BouncingBall : MonoBehaviour
 
 		if (collision.gameObject.tag == "LooseBorder" && !hook.ropeAttached)
         {
-            //Debug.Log("Losse yby border");
-             GameManager.LevelScore l;
-             l.height = transform.position.y.ToString();
-             l.score = gameManager.Score.ToString();
-            gameManager.Save(l);
-
+            SaveLevelInfo();
             Respawn();
             // SceneManager.LoadScene("Loose");
 
@@ -341,7 +331,7 @@ public class BouncingBall : MonoBehaviour
             //Debug.Log("Losse by bomb");
             //gameManager.Save(transform.position.y.ToString());
             //Time.timeScale = 0;
-
+            SaveLevelInfo();
             Respawn();
             //SceneManager.LoadScene("Loose");
 
@@ -369,6 +359,7 @@ public class BouncingBall : MonoBehaviour
             }
             else
             {
+                SaveLevelInfo();
                 Respawn();
                 //SceneManager.LoadScene("Loose");
             }
@@ -617,5 +608,16 @@ public class BouncingBall : MonoBehaviour
                 }               
             }
         }
+    }
+
+    private void SaveLevelInfo()
+    {
+        GameManager.LevelScore l;
+        l.pozX = currentCheckpoint.transform.position.x.ToString();
+        l.pozY = currentCheckpoint.transform.position.y.ToString();
+        l.pozZ = currentCheckpoint.transform.position.z.ToString();
+        l.score = gameManager.Score.ToString();
+        l.level = level.ToString();
+        gameManager.Save(l);
     }
 }
