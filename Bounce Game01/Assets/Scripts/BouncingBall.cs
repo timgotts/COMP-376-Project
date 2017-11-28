@@ -12,8 +12,10 @@ public class BouncingBall : MonoBehaviour
     public float force = 7;
     public float transformForce = 3;
     public float JumpSpeed = 200;
+    public bool isSwinging;
 
     public GameObject rockPowerUpContainer;
+    public GameObject ropePowerUpContainer;
     private Rigidbody2D rigid;
 
     AudioSource audioSource;
@@ -34,6 +36,7 @@ public class BouncingBall : MonoBehaviour
     //Tarik rock stuff
     public GameObject windAnimation;
     bool inRockMode = false;
+    public bool inRopeMode = false;
     bool hasJumped = false;
     bool hasGroundPound = false;
 
@@ -52,6 +55,10 @@ public class BouncingBall : MonoBehaviour
 
     public AudioClip keyPickUpSound;
     public bool hasRedKey = false;
+
+    public Vector2 ropeHook;
+    public float swingForce = 4f;
+    public GrapplingHook hook;
 
 
     // Use this for initialization
@@ -106,39 +113,59 @@ public class BouncingBall : MonoBehaviour
         }
 
 
+
         animator.SetBool("hasBounced", hasBounced);
         animator.SetBool("inRockMode", inRockMode);
 
-        Vector3 velocity = new Vector3(0, rigid.velocity.y, 0);
-        rigid.velocity = velocity;
+        
+        //Vector3 velocity = new Vector3(0, rigid.velocity.y, 0);
+        //rigid.velocity = velocity;
 
-        if (Input.GetAxis(key01) == 1 && !isConenctedToRope && !hasGroundPound)
+
+        if (!isSwinging)
         {
-            if (inRockMode)
+            if (Input.GetAxis(key01) == 1 && !isConenctedToRope && !hasGroundPound)
             {
-                transform.Translate(Vector3.right * Time.deltaTime * speed, Space.World);
+                if (inRockMode)
+                {
+                    transform.Translate(Vector3.right * Time.deltaTime * speed, Space.World);
 
-                transform.Rotate(Vector3.back * 10, Space.World);
+                    transform.Rotate(Vector3.back * 10, Space.World);
+                }
+                else
+                {
+                    transform.Translate(Vector3.right * Time.deltaTime * speed);
+                    rigid.AddForce(Vector3.right * transformForce, ForceMode2D.Force);
+                }
             }
+            else if (Input.GetAxis(key02) == 1 && !isConenctedToRope && !hasGroundPound)
+            {
+                if (inRockMode)
+                {
+                    transform.Translate(Vector3.left * Time.deltaTime * speed, Space.World);
+                    transform.Rotate(Vector3.forward * 10, Space.World);
+                }
+                else
+                {
+                    transform.Translate(Vector3.left * Time.deltaTime * speed);
+                    rigid.AddForce(Vector3.left * transformForce, ForceMode2D.Force);
+                }
+            }
+
             else
             {
-                transform.Translate(Vector3.right * Time.deltaTime * speed);
-                rigid.AddForce(Vector3.right * transformForce, ForceMode2D.Force);
+                if (rigid.velocity.x < 0)
+                {
+                    rigid.velocity = new Vector2(Mathf.Max(rigid.velocity.x + 0.1f, 0), rigid.velocity.y);
+                }
+                else if (rigid.velocity.x > 0)
+                {
+                    rigid.velocity = new Vector2(Mathf.Min(0, rigid.velocity.x - 0.1f), rigid.velocity.y);
+                }
             }
         }
-        if (Input.GetAxis(key02) == 1 && !isConenctedToRope && !hasGroundPound)
-        {
-            if (inRockMode)
-            {
-                transform.Translate(Vector3.left * Time.deltaTime * speed, Space.World);
-                transform.Rotate(Vector3.forward * 10, Space.World);
-            }
-            else
-            {
-                transform.Translate(Vector3.left * Time.deltaTime * speed);
-                rigid.AddForce(Vector3.left * transformForce, ForceMode2D.Force);
-            }
-        }
+       
+
 
         if (Input.GetButtonDown("Jump") && isGrounded && inRockMode)
         {
@@ -156,7 +183,7 @@ public class BouncingBall : MonoBehaviour
             rigid.AddForce(Vector3.down * 15, ForceMode2D.Impulse);
         }
 
-        if (Input.GetKeyDown(KeyCode.L) && inRockMode)
+        if (Input.GetKeyDown(KeyCode.L))
         {
             GiveUpPower();
         }
@@ -270,13 +297,52 @@ public class BouncingBall : MonoBehaviour
         }
     }
 
+
+    void FixedUpdate()
+    {
+        float horizontalInput = Input.GetAxis("Horizontal");
+        if (horizontalInput < 0f || horizontalInput > 0f)
+        {
+            if (isSwinging)
+            {
+                // 1 - Get a normalized direction vector from the player to the hook point
+                var playerToHookDirection = (ropeHook - (Vector2) transform.position).normalized;
+
+                // 2 - Inverse the direction to get a perpendicular direction
+                Vector2 perpendicularDirection;
+                if (horizontalInput > 0)
+                {
+                    perpendicularDirection = new Vector2(-playerToHookDirection.y, playerToHookDirection.x);
+                    var leftPerpPos = (Vector2) transform.position - perpendicularDirection * -2f;
+                    //Debug.DrawLine(transform.position, leftPerpPos, Color.green, 0f);
+                }
+                else
+                {
+                    perpendicularDirection = new Vector2(playerToHookDirection.y, -playerToHookDirection.x);
+                    var rightPerpPos = (Vector2) transform.position + perpendicularDirection * 2f;
+                    Debug.DrawLine(transform.position, rightPerpPos, Color.green, 0f);
+                }
+
+                var force = perpendicularDirection * swingForce;
+                rigid.AddForce(force, ForceMode2D.Force);
+            }
+
+        }
+    }
+
     /// <summary>
     /// Respawns player at checkpoint
     /// </summary>
     void Respawn()
     {
+        if (hook != null)
+        {
+            hook.ResetRope();
+        }
         transform.position = currentCheckpoint.transform.position;
+        
         Instantiate(respawnParticle, gameObject.transform.position, gameObject.transform.rotation);
+
     }
 
     /// <summary>
@@ -314,22 +380,51 @@ public class BouncingBall : MonoBehaviour
         rigid.gravityScale = 3;
     }
 
+
+    void SetRopeMode()
+    {
+        inRopeMode = true;
+
+        
+    }
     void setBlobMode()
     {
-        inRockMode = false;
-        rigid.gravityScale = 1;
-
-        //Turn Bounciness off.
-
-        rigid.AddForce(Vector3.up * 0.5f, ForceMode2D.Impulse);
-
-        //Turn bounciness on.
-        gameObject.GetComponent<CircleCollider2D>().sharedMaterial = bounciness;
-
-        foreach (Transform rockChild in rockPowerUpContainer.transform)
+        if (inRockMode)
         {
-            rockChild.gameObject.SetActive(true);
+            inRockMode = false;
+            rigid.gravityScale = 1;
+
+            //Turn Bounciness off.
+            rigid.AddForce(Vector3.up * 0.5f, ForceMode2D.Impulse);
+
+            //Turn bounciness on.
+            gameObject.GetComponent<CircleCollider2D>().sharedMaterial = bounciness;
+            foreach (Transform rockChild in rockPowerUpContainer.transform)
+            {
+                rockChild.gameObject.SetActive(true);
+            }
+
         }
+        if (inRopeMode)
+        {
+            inRopeMode = false;
+            hook.ResetRope();
+
+            foreach (Transform ropeChild in ropePowerUpContainer.transform)
+            {
+                ropeChild.gameObject.SetActive(true);
+            }
+        }
+
+
+
+
+
+
+
+
+        
+
 
     }
 
@@ -374,6 +469,15 @@ public class BouncingBall : MonoBehaviour
             foreach (Transform rockChild in rockPowerUpContainer.transform)
             {
                 rockChild.gameObject.SetActive(false);
+            }
+        }
+        else if (collision.gameObject.CompareTag("Rope"))
+        {
+            SetRopeMode();
+
+            foreach (Transform ropeChild in ropePowerUpContainer.transform)
+            {
+                ropeChild.gameObject.SetActive(false);
             }
         }
 
