@@ -20,7 +20,7 @@ public class GrapplingHook : MonoBehaviour
     public Transform crosshair;
     public SpriteRenderer crosshairSprite;
     public BouncingBall playerMovement;
-    private bool ropeAttached;
+    public bool ropeAttached;
     private Vector2 playerPosition;
     private Rigidbody2D ropeHingeAnchorRb;
     private bool distanceSet;
@@ -56,10 +56,10 @@ public class GrapplingHook : MonoBehaviour
 
 
             var aimDirection = Quaternion.Euler(0, 0, aimAngle * Mathf.Rad2Deg) * Vector2.right;
-            // 5
+            
             playerPosition = transform.position;
 
-            // 6
+            
             if (!ropeAttached)
             {
                 SetCrosshairPosition(aimAngle);
