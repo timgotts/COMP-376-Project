@@ -462,6 +462,7 @@ public class BouncingBall : MonoBehaviour
     void SetRopeMode()
     {
         inRopeMode = true;
+		GetComponent<SpriteRenderer> ().color = Color.yellow;
 
         
     }
@@ -493,6 +494,8 @@ public class BouncingBall : MonoBehaviour
                 ropeChild.gameObject.SetActive(true);
             }
         }
+
+		GetComponent<SpriteRenderer>().color = new Color(0.0f, 1.0f, 0.0f, 1.0f);
 
 
 
