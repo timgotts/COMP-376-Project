@@ -20,7 +20,7 @@ public class BouncingBall : MonoBehaviour
     public AudioClip bounceSound;
     Animator animator;
     bool hasBounced = false;
-    //private GameManager gameManager;
+    private GameManager gameManager;
     private bool isConenctedToRope = false;
 
 
@@ -66,11 +66,11 @@ public class BouncingBall : MonoBehaviour
         rigid = GetComponent<Rigidbody2D>();
         audioSource.Play();
 
-        //gameManager = GameObject.FindObjectOfType<GameManager>();
+        gameManager = GameObject.FindObjectOfType<GameManager>();
 
-       // if (gameManager.gameIsLoaded)
+        if (gameManager.gameIsLoaded)
         {
-        //        this.transform.position = gameManager.InitialPos();
+                this.transform.position = gameManager.InitialPos();
         }
     }
 
@@ -100,9 +100,9 @@ public class BouncingBall : MonoBehaviour
             transform.rotation = Quaternion.identity;
         }
         // Adjust volume
-        //  if (audioSource.volume != gameManager.Sound)
+          if (audioSource.volume != gameManager.Sound)
         {
-         //         audioSource.volume = gameManager.Sound;
+                  audioSource.volume = gameManager.Sound;
         }
 
 
@@ -222,10 +222,10 @@ public class BouncingBall : MonoBehaviour
         if (collision.gameObject.tag == "LooseBorder")
         {
             //Debug.Log("Losse yby border");
-             //GameManager.LevelScore l;
-            // l.height = transform.position.y.ToString();
-            // l.score = gameManager.Score.ToString();
-            // gameManager.Save(l);
+             GameManager.LevelScore l;
+             l.height = transform.position.y.ToString();
+             l.score = gameManager.Score.ToString();
+            gameManager.Save(l);
 
             Respawn();
             // SceneManager.LoadScene("Loose");
@@ -382,6 +382,11 @@ public class BouncingBall : MonoBehaviour
             audioSource.PlayOneShot(keyPickUpSound);
             hasRedKey = true;
             Destroy(collision.gameObject);
+        }
+
+        if (collision.gameObject.CompareTag("WinPortal"))
+        {
+            SceneManager.LoadScene("Win");
         }
     }
 }
