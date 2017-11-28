@@ -13,6 +13,7 @@ public class BouncingBall : MonoBehaviour
     public float force = 7;
     public float transformForce = 3;
     public float JumpSpeed = 200;
+	public int grappleShots = 0;
 
     public bool isSwinging;
 
@@ -69,6 +70,8 @@ public class BouncingBall : MonoBehaviour
     public float swingForce = 4f;
     public GrapplingHook hook;
 
+	private GameObject powerUps;
+
 
     // This struct will be used for chaking the number of bounce in the level 1
     public struct BounecBox
@@ -121,6 +124,11 @@ public class BouncingBall : MonoBehaviour
                 BounceBoxesLevel1[i] = new BounecBox { timeOfDead = 0f, isAlive = true, boxCircle = bonce, pos = bonce.transform.position };
             }
         }
+
+		powerUps =  GameObject.Find ("PowerUpCount");
+		if (powerUps) {
+			powerUps.SetActive (false);
+		}
     }
 
     // Update is called once per frame
@@ -201,7 +209,9 @@ public class BouncingBall : MonoBehaviour
         animator.SetBool("inRockMode", inRockMode);
 
         if (!isSwinging)
-        {
+		{
+
+
             if (Input.GetAxis(key01) == 1 && !isConenctedToRope && !hasGroundPound)
             {
                 if (inRockMode)
@@ -241,6 +251,10 @@ public class BouncingBall : MonoBehaviour
                     rigid.velocity = new Vector2(Mathf.Min(0, rigid.velocity.x - 0.1f), rigid.velocity.y);
                 }
             }
+
+			if (grappleShots == 0 && inRopeMode) {
+				GiveUpPower ();
+			}
         }
        
 
@@ -352,6 +366,7 @@ public class BouncingBall : MonoBehaviour
             {
                 audioSource.PlayOneShot(rockExplosion);
                 collision.gameObject.GetComponent<EnemyMove>().isDead = true;
+				gameManager.AddScore (1);
             }
             else if (inRockMode)
             {
@@ -408,6 +423,7 @@ public class BouncingBall : MonoBehaviour
         {
             hook.ResetRope();
         }
+		GiveUpPower ();
         transform.position = currentCheckpoint.transform.position;
         
         Instantiate(respawnParticle, gameObject.transform.position, gameObject.transform.rotation);
@@ -453,7 +469,9 @@ public class BouncingBall : MonoBehaviour
     void SetRopeMode()
     {
         inRopeMode = true;
+		grappleShots = 3;
 		GetComponent<SpriteRenderer> ().color = Color.yellow;
+		powerUps.SetActive (true);
 
         
     }
@@ -484,6 +502,7 @@ public class BouncingBall : MonoBehaviour
             {
                 ropeChild.gameObject.SetActive(true);
             }
+			powerUps.SetActive (false);
         }
 
 		GetComponent<SpriteRenderer>().color = new Color(0.0f, 1.0f, 0.0f, 1.0f);
@@ -550,12 +569,8 @@ public class BouncingBall : MonoBehaviour
         }
         else if (collision.gameObject.CompareTag("Rope"))
         {
+			collision.gameObject.SetActive (false);
             SetRopeMode();
-
-            foreach (Transform ropeChild in ropePowerUpContainer.transform)
-            {
-                ropeChild.gameObject.SetActive(false);
-            }
         }
 
         if (collision.gameObject.CompareTag("RedKey"))
