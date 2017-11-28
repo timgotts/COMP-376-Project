@@ -16,6 +16,12 @@ public class GameManager : MonoBehaviour
         public string pozZ;
         public string score;
     };
+    public struct CheckWIn
+    {
+        public string level1;
+        public string level2;
+        public string level3;
+    };
     public bool loadFromlastScene = false; 
     public bool isPause = false;
     private float soundVolume = 0.6f;
@@ -27,13 +33,12 @@ public class GameManager : MonoBehaviour
     // Use this for initialization
     private void Awake()
     {
-        LoadBestScore();
+        LoaFormerState();
     }
     void Start ()
     {
-        //Did this for testing
-        //SceneManager.LoadScene("Level02");
-        DontDestroyOnLoad(gameObject);        
+        DontDestroyOnLoad(gameObject);
+        CreateXMLForWinCondition();
     }
 	
     public int Score
@@ -84,7 +89,6 @@ public class GameManager : MonoBehaviour
 
     public void Save(LevelScore gd)
     {
-        Debug.Log("from game manager: " + gd.pozY);
         if (score > bestscore)
         {
             bestscore = score;
@@ -119,7 +123,7 @@ public class GameManager : MonoBehaviour
             SceneManager.LoadScene(lastLevel);
         }      
     }
-    public void LoadBestScore()
+    public void LoaFormerState()
     {
         if (File.Exists("xmlsave.xml"))
         {
@@ -145,5 +149,66 @@ public class GameManager : MonoBehaviour
     public void Loadlevel(int lev)
     {
         SceneManager.LoadScene(lev);
+    }
+
+    private void CreateXMLForWinCondition()
+    {
+        if (!File.Exists("xmlWin.xml"))
+        {
+            var reader = new StreamReader(File.Open("xmlWin.xml", FileMode.Create));
+        }
+    }
+    public void UpdateXMLForWinCondition(int level)
+    {
+        if (File.Exists("xmlWin.xml"))
+        {
+            int l1 = 0;
+            int l2 = 0;
+            int l3 = 0;
+            CheckWIn gd;
+            XmlSerializer ser = new XmlSerializer(typeof(CheckWIn));
+            using (var reader = new StreamReader(File.Open("xmlWin.xml", FileMode.OpenOrCreate)))
+            {
+                gd = (CheckWIn)ser.Deserialize(reader);
+                l1 = int.Parse(gd.level1);
+                l2 = int.Parse(gd.level2);
+                l3 = int.Parse(gd.level3);
+                switch (level)
+                {
+                    case 1:
+                        {
+                            gd.level1 = level.ToString();
+                            break;
+                        }
+                    case 2:
+                        {
+                            gd.level2 = level.ToString();
+                            break;
+                        }
+                    case 3:
+                        {
+                            gd.level3 = level.ToString();
+                            break;
+                        }
+                }
+
+                if (l1 == 1 && l2 == 2 && l3 == 1)
+                {
+                    SceneManager.LoadScene("Win");
+                    if (!File.Exists("xmlWin.xml"))
+                    {
+                        File.Delete("xmlWin.xml");
+                    }
+                }
+                else
+                {
+                    using (var writer = new StreamWriter(File.Open("xmlWin.xml", FileMode.Create)))
+                    {
+                        ser.Serialize(writer, gd);
+                    }
+                }
+
+            }
+        }
     }
 }
