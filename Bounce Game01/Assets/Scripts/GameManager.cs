@@ -156,4 +156,8 @@ public class GameManager : MonoBehaviour
         }
 
     }
+    public void Loadlevel(int lev)
+    {
+        SceneManager.LoadScene(lev);
+    }
 }

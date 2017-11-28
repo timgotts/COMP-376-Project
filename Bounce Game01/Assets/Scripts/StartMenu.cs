@@ -34,7 +34,7 @@ public class StartMenu : MonoBehaviour
 
         vecPos1 = level1.transform.position;
         vecPos1.x -= 4.5f;
-        gameObject.transform.position = vecPos1;
+       // gameObject.transform.position = vecPos1;
         onLevel1 = true;
 
         vecPos2 = credits.transform.position;
@@ -87,13 +87,13 @@ public class StartMenu : MonoBehaviour
 
         if (onLevel1)
         {
-            gameObject.transform.position = vecPos1;
+            //gameObject.transform.position = vecPos1;
             level1.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
             credits.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
         }
         else if (onCredits)
         {
-            gameObject.transform.position = vecPos2;
+            //gameObject.transform.position = vecPos2;
             credits.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
             level1.transform.localScale = new Vector3(1.0f, 1.0f, 1.0f);
         }
