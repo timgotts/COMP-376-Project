@@ -33,7 +33,6 @@ public class GameManager : MonoBehaviour
     {
         //Did this for testing
         //SceneManager.LoadScene("Level02");
-
         DontDestroyOnLoad(gameObject);        
     }
 	
@@ -122,17 +121,21 @@ public class GameManager : MonoBehaviour
     }
     public void LoadBestScore()
     {
-        LevelScore gd;
-        XmlSerializer ser = new XmlSerializer(typeof(LevelScore));
-        using (var reader = new StreamReader(File.Open("xmlsave.xml", FileMode.Open)))
+        if (File.Exists("xmlsave.xml"))
         {
-            gd = (LevelScore)ser.Deserialize(reader);
-            bestscore =int.Parse (gd.score);
-            lastPos.x = float.Parse(gd.pozX);
-            lastPos.y = float.Parse(gd.pozY);
-            lastPos.z = float.Parse(gd.pozZ);
-            lastLevel = int.Parse(gd.level);
+            LevelScore gd;
+            XmlSerializer ser = new XmlSerializer(typeof(LevelScore));
+            using (var reader = new StreamReader(File.Open("xmlsave.xml", FileMode.Open)))
+            {
+                gd = (LevelScore)ser.Deserialize(reader);
+                bestscore = int.Parse(gd.score);
+                lastPos.x = float.Parse(gd.pozX);
+                lastPos.y = float.Parse(gd.pozY);
+                lastPos.z = float.Parse(gd.pozZ);
+                lastLevel = int.Parse(gd.level);
+            }
         }
+
     }
     public Vector3 InitialPos()
     {
