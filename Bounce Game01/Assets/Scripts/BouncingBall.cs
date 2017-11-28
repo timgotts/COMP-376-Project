@@ -319,7 +319,7 @@ public class BouncingBall : MonoBehaviour
 
         }
 
-        if (collision.gameObject.tag == "LooseBorder")
+		if (collision.gameObject.tag == "LooseBorder" && !hook.ropeAttached)
         {
             SaveLevelInfo();
             Respawn();
@@ -374,16 +374,16 @@ public class BouncingBall : MonoBehaviour
         {
             if (isSwinging)
             {
-                // 1 - Get a normalized direction vector from the player to the hook point
+                
                 var playerToHookDirection = (ropeHook - (Vector2) transform.position).normalized;
 
-                // 2 - Inverse the direction to get a perpendicular direction
+             
                 Vector2 perpendicularDirection;
                 if (horizontalInput > 0)
                 {
                     perpendicularDirection = new Vector2(-playerToHookDirection.y, playerToHookDirection.x);
                     var leftPerpPos = (Vector2) transform.position - perpendicularDirection * -2f;
-                    //Debug.DrawLine(transform.position, leftPerpPos, Color.green, 0f);
+                    Debug.DrawLine(transform.position, leftPerpPos, Color.green, 0f);
                 }
                 else
                 {
