@@ -138,11 +138,9 @@ public class BouncingBall : MonoBehaviour
                     //float zRotation = Mathf.PingPong(Time.time * rotationsPerMinute, 90f);
                     Quaternion newRotation = Quaternion.AngleAxis(-90, new Vector3(0, 0, 1));
                     camera.transform.rotation = Quaternion.Slerp(camera.transform.rotation, newRotation, .0005f);
-                    //Debug.Log("z manfi: " + camera.transform.rotation.eulerAngles.z);
                     if (camera.transform.rotation.eulerAngles.z >= 269)
                     {
                         rotateCameraLeft = true;
-                        // Debug.Log("z negative: " + camera.transform.rotation.z);
                     }
                 }
 
