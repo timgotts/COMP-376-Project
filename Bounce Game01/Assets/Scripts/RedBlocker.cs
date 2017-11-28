@@ -7,7 +7,7 @@ public class RedBlocker : MonoBehaviour
     AudioSource audioSource;
     public AudioClip unlockSound;
     bool hasPlayedSound = false;
-
+    
     bool doOnce = true;
 
     // Use this for initialization
@@ -48,6 +48,7 @@ public class RedBlocker : MonoBehaviour
                 }
                 doOnce = false;
 
+                col.gameObject.GetComponent<BouncingBall>().hasRedKey = false;
                 StartCoroutine(isTimeToDead(this.gameObject, 5));
             }
         }

@@ -17,6 +17,10 @@ public class BoxCircle : MonoBehaviour {
     {
         if (collision.gameObject.tag == "Player")
         {
+            BouncingBall blobi = collision.gameObject.GetComponent<BouncingBall>();
+            // Set the color to Red
+            blobi.GetComponent<SpriteRenderer>().color = new Color(1.0f, 0.0f, 0.0f, 1.0f);
+            blobi.canOverJump = true;
             StartCoroutine(isTimeToDead(0.1f));
 
         }

@@ -85,7 +85,7 @@ public class EnemyMove : MonoBehaviour
     {
         audioSource = GetComponent<AudioSource>();
 
-        if (gameObject.name == "KeySpider")
+        if (gameObject.name.Contains("KeySpider"))
         {
             scale = 2.1f;
         }
@@ -101,7 +101,7 @@ public class EnemyMove : MonoBehaviour
     {
         if (isDead)
         {
-            if(gameObject.name == "KeySpider")
+            if(gameObject.name.Contains("KeySpider"))
             {
                 audioSource.PlayOneShot(dropKeySound);
                 Instantiate(redKey, transform.position, transform.rotation);
