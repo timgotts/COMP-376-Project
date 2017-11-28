@@ -134,8 +134,7 @@ public class BouncingBall : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-       
-
+      
         // Check bounce boxes in level 1
         if (level == 1)
         {
@@ -506,17 +505,6 @@ public class BouncingBall : MonoBehaviour
         }
 
 		GetComponent<SpriteRenderer>().color = new Color(0.0f, 1.0f, 0.0f, 1.0f);
-
-
-
-
-
-
-
-
-        
-
-
     }
 
     /// <summary>
@@ -579,10 +567,10 @@ public class BouncingBall : MonoBehaviour
             hasRedKey = true;
             Destroy(collision.gameObject);
         }
-
         if (collision.gameObject.CompareTag("WinPortal"))
         {
-            SceneManager.LoadScene("Win");
+            gameManager.UpdateXMLForWinCondition(level);
+            //SceneManager.LoadScene("Win");
         }
     }
 
