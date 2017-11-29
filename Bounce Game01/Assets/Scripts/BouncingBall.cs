@@ -330,8 +330,13 @@ public class BouncingBall : MonoBehaviour
 
         }
 
-		if (collision.gameObject.tag == "LooseBorder" && !hook.ropeAttached)
+		if (collision.gameObject.tag == "LooseBorder")
         {
+			if (hook != null) {
+				if (!hook.ropeAttached) {
+					return;
+				}
+			}
             SaveLevelInfo();
             Respawn();
             // SceneManager.LoadScene("Loose");
@@ -416,6 +421,11 @@ public class BouncingBall : MonoBehaviour
     /// </summary>
     void Respawn()
     {
+        if (currentCheckpoint.GetComponent<CheckPointManager>().touchedLava)
+        {
+            SceneManager.LoadScene("Loose");
+        }
+
         if (hook != null)
         {
             hook.ResetRope();
