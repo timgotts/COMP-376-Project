@@ -7,6 +7,7 @@ public class CheckPointManager : MonoBehaviour
 
     GameObject player;
     Animator animator;
+	GameManager gameManager;
 
     bool isCheckPointTouched;
     // Use this for initialization
@@ -14,6 +15,7 @@ public class CheckPointManager : MonoBehaviour
     {
         animator = GetComponent<Animator>();
         player = GameObject.Find("Player");
+		gameManager = GameObject.FindObjectOfType<GameManager>();
     }
 
     // Update is called once per frame
@@ -28,10 +30,14 @@ public class CheckPointManager : MonoBehaviour
     /// <param name="collision"></param>
     private void OnTriggerEnter2D(Collider2D col)
     {
-        if (col.gameObject.CompareTag("Player"))
+		if (!isCheckPointTouched) {
+			gameManager.AddScore (1);
+		}
+		if (col.gameObject.CompareTag("Player"))
         {
             isCheckPointTouched = true;
             player.GetComponent<BouncingBall>().currentCheckpoint = gameObject;
         }
+
     }
 }

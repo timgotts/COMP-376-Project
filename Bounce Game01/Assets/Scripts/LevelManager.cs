@@ -10,17 +10,20 @@ public class LevelManager : MonoBehaviour {
     private GameManager gameManager;
     private Text pauseText;
     private Text scoreText;
+	private Text powerUpsText;
     private Text bestScore;
     public GameObject soundObject;
     private SoundSlider soundSlider;
     // private bool isPause = false;
     // Use this for initialization
-    void Start ()
+    void Awake ()
     {
         gameManager = GameObject.FindObjectOfType<GameManager>();
         GameObject text = GameObject.Find("Pause");
+		player = GameObject.FindObjectOfType<BouncingBall> ();
         GameObject score = GameObject.Find("Score");
         GameObject bS = GameObject.Find("BestScore");
+		GameObject powerUps = GameObject.Find ("PowerUps");
         if (text)
         {
             pauseText = text.GetComponent<Text>();
@@ -34,6 +37,10 @@ public class LevelManager : MonoBehaviour {
             bestScore = bS.GetComponent<Text>();
             bestScore.text = gameManager.bestscore.ToString();
         }
+		if (powerUps) {
+			powerUpsText = powerUps.GetComponent<Text> ();
+		}
+
     }
 	
 	// Update is called once per frame
@@ -43,6 +50,11 @@ public class LevelManager : MonoBehaviour {
         {
             scoreText.text = gameManager.Score.ToString();
         }
+			
+		if (powerUpsText) {
+			powerUpsText.text = player.grappleShots.ToString();
+			}
+
     }
     public void Pause()
     {

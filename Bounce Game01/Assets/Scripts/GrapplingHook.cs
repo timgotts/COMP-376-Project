@@ -93,7 +93,6 @@ public class GrapplingHook : MonoBehaviour
     {
         if (Input.GetMouseButton(0))
         {
-            
             if (ropeAttached) return;
             ropeRenderer.enabled = true;
 
@@ -102,6 +101,7 @@ public class GrapplingHook : MonoBehaviour
             
             if (hit.collider != null)
             {
+				playerMovement.grappleShots--;
                 ropeAttached = true;
                 playerMovement.isSwinging = true;
                 if (!ropePositions.Contains(hit.point))
