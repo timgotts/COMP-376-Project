@@ -333,7 +333,7 @@ public class BouncingBall : MonoBehaviour
 		if (collision.gameObject.tag == "LooseBorder")
         {
 			if (hook != null) {
-				if (!hook.ropeAttached) {
+				if (hook.ropeAttached) {
 					return;
 				}
 			}
