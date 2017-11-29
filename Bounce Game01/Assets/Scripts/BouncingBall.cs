@@ -468,6 +468,7 @@ public class BouncingBall : MonoBehaviour
         inRockMode = true;
 
         //Turn bounciness off
+        GetComponent<SpriteRenderer>().color = Color.white;
         gameObject.GetComponent<CircleCollider2D>().sharedMaterial = null;
         rigid.gravityScale = 3;
     }

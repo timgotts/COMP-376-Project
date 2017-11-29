@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LevelScore xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <level>2</level>
+  <pozX>6.3</pozX>
+  <pozY>11.31</pozY>
+  <pozZ>0</pozZ>
+  <score>2</score>
+</LevelScore>
