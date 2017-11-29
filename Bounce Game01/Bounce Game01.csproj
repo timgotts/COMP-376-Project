@@ -118,6 +118,8 @@
     <Compile Include="Assets\Scripts\SandTiles.cs" />
     <Compile Include="Assets\Scripts\SoundSlider.cs" />
     <Compile Include="Assets\Scripts\StartMenu.cs" />
+    <Compile Include="Assets\Scripts\Tutorial.cs" />
+    <Compile Include="Assets\Scripts\TypeWriter.cs" />
     <Compile Include="Assets\Scripts\VideoPlayerScript.cs" />
     <Compile Include="Assets\Scripts\YelloType.cs" />
   </ItemGroup>
