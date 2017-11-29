@@ -155,19 +155,28 @@ public class GameManager : MonoBehaviour
     {
         if (!File.Exists("xmlWin.xml"))
         {
-            var reader = new StreamReader(File.Open("xmlWin.xml", FileMode.Create));
+            CheckWIn gd;
+            gd.level1 = "0";
+            gd.level2 = "0";
+            gd.level3 = "0";
+            XmlSerializer ser = new XmlSerializer(typeof(CheckWIn));
+            using (var writer = new StreamWriter(File.Open("xmlWin.xml", FileMode.Create)))
+            {
+                ser.Serialize(writer, gd);
+            }
         }
     }
     public void UpdateXMLForWinCondition(int level)
     {
-        if (File.Exists("xmlWin.xml"))
-        {
+        //SceneManager.LoadScene(level + 1);
+       // if (File.Exists("xmlWin.xml"))
+        //{
             int l1 = 0;
             int l2 = 0;
             int l3 = 0;
             CheckWIn gd;
             XmlSerializer ser = new XmlSerializer(typeof(CheckWIn));
-            using (var reader = new StreamReader(File.Open("xmlWin.xml", FileMode.OpenOrCreate)))
+            using (var reader = new StreamReader(File.Open("xmlWin.xml", FileMode.Open)))
             {
                 gd = (CheckWIn)ser.Deserialize(reader);
                 l1 = int.Parse(gd.level1);
@@ -192,24 +201,26 @@ public class GameManager : MonoBehaviour
                         }
                 }
 
-                if (l1 == 1 && l2 == 2 && l3 == 1)
+                if (l1 != 0 && l2 != 0 && l3 != 0)
                 {
                     SceneManager.LoadScene("Win");
-                    if (!File.Exists("xmlWin.xml"))
+                    if (File.Exists("xmlWin.xml"))
                     {
                         File.Delete("xmlWin.xml");
                     }
                 }
                 else
                 {
-                    using (var writer = new StreamWriter(File.Open("xmlWin.xml", FileMode.Create)))
-                    {
-                        ser.Serialize(writer, gd);
-                    }
+                //XmlSerializer ser2 = new XmlSerializer(typeof(CheckWIn));
+                //using (var writer = new StreamWriter(File.Open("xmlWin.xml", FileMode.Create)))
+                //{
+                //    ser2.Serialize(writer, gd);
+                //}
+               // Debug.Log("next level");
                     SceneManager.LoadScene(level+1);
                 }
 
             }
-        }
+       // }
     }
 }
