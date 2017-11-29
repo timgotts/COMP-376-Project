@@ -332,8 +332,13 @@ public class BouncingBall : MonoBehaviour
 
         }
 
-		if (collision.gameObject.tag == "LooseBorder" && !hook.ropeAttached)
+		if (collision.gameObject.tag == "LooseBorder")
         {
+			if (hook != null) {
+				if (!hook.ropeAttached) {
+					return;
+				}
+			}
             SaveLevelInfo();
             Respawn();
             // SceneManager.LoadScene("Loose");
