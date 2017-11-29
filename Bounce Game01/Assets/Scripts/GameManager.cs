@@ -206,6 +206,7 @@ public class GameManager : MonoBehaviour
                     {
                         ser.Serialize(writer, gd);
                     }
+                    SceneManager.LoadScene(level+1);
                 }
 
             }

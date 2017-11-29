@@ -352,7 +352,7 @@ public class BouncingBall : MonoBehaviour
             //SceneManager.LoadScene("Loose");
 
         }
-        else if (collision.gameObject.tag == "Hook" && Input.GetKey(KeyCode.A))
+        else if (collision.gameObject.tag == "Hook" && Input.GetKey(KeyCode.Z))
         {
             if (!inRockMode)
             {
@@ -578,6 +578,7 @@ public class BouncingBall : MonoBehaviour
         if (collision.gameObject.CompareTag("WinPortal"))
         {
             gameManager.UpdateXMLForWinCondition(level);
+
             //SceneManager.LoadScene("Win");
         }
     }
