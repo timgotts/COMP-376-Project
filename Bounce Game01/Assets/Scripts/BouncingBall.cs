@@ -274,12 +274,12 @@ public class BouncingBall : MonoBehaviour
             rigid.AddForce(Vector3.down * 15, ForceMode2D.Impulse);
         }
 
-        if (Input.GetKeyDown(KeyCode.L))
+        if (Input.GetKeyDown(KeyCode.R))
         {
             GiveUpPower();
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (Input.GetKeyDown(KeyCode.LeftControl))
         {
             rigid.bodyType = RigidbodyType2D.Dynamic;
             rigid.velocity = new Vector2(0, 0);
