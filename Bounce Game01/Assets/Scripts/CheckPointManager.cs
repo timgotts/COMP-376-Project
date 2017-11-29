@@ -31,7 +31,12 @@ public class CheckPointManager : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D col)
     {
 		if (!isCheckPointTouched) {
-			gameManager.AddScore (1);
+            BouncingBall p1 =player.GetComponent<BouncingBall>();
+            if (p1.level != 1 )
+            {
+                gameManager.AddScore(1);
+            }
+            
 		}
 		if (col.gameObject.CompareTag("Player"))
         {

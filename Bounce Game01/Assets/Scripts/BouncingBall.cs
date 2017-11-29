@@ -209,8 +209,6 @@ public class BouncingBall : MonoBehaviour
 
         if (!isSwinging)
 		{
-
-
             if (Input.GetAxis(key01) == 1 && !isConenctedToRope && !hasGroundPound)
             {
                 if (inRockMode)
