@@ -418,6 +418,11 @@ public class BouncingBall : MonoBehaviour
     /// </summary>
     void Respawn()
     {
+        if (currentCheckpoint.GetComponent<CheckPointManager>().touchedLava)
+        {
+            SceneManager.LoadScene("Loose");
+        }
+
         if (hook != null)
         {
             hook.ResetRope();
