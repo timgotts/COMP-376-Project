@@ -37,6 +37,11 @@ public class MenuMouseHover : MonoBehaviour {
     }
     private void OnMouseDown()
     {
+        if (level == -1)
+        {
+            Application.Quit();
+            return;
+        }
         if (loadFromLastLevel)
         {
             int formerLevel = manager.lastLevel;
