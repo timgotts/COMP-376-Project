@@ -217,7 +217,7 @@ public class GameManager : MonoBehaviour
                 //    ser2.Serialize(writer, gd);
                 //}
                // Debug.Log("next level");
-               if (level == 3)
+               if (level == 4)
                 {
                     SceneManager.LoadScene("Win");
                 }

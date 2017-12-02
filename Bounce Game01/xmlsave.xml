@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LevelScore xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <level>2</level>
-  <pozX>4.4824</pozX>
-  <pozY>217.06</pozY>
+  <pozX>5.17</pozX>
+  <pozY>22.75</pozY>
   <pozZ>0</pozZ>
-  <score>16</score>
+  <score>53</score>
 </LevelScore>
